@@ -1,4 +1,4 @@
-import { auth, db } from "firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
 createUserWithEmailAndPassword,
@@ -14,58 +14,44 @@ getDoc
 const loginBtn = document.getElementById("loginBtn");
 const registerBtn = document.getElementById("registerBtn");
 
+if(loginBtn){
 
-// LOGIN
-if (loginBtn) {
-
-loginBtn.addEventListener("click", async () => {
-
-try {
+loginBtn.onclick = async ()=>{
 
 const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
 
-const userCred = await signInWithEmailAndPassword(auth, email, password);
+const user = await signInWithEmailAndPassword(auth,email,password);
 
-const userDoc = await getDoc(doc(db,"users",userCred.user.uid));
+const userDoc = await getDoc(doc(db,"users",user.user.uid));
 
-const userData = userDoc.data();
+const role = userDoc.data().role;
 
-if(userData.role === "admin"){
+if(role==="admin"){
 
-window.location.href = "admin.html";
+window.location="admin.html";
 
 }else{
 
-window.location.href = "dashboard.html";
+window.location="dashboard.html";
 
 }
 
-} catch(err){
-
-alert(err.message);
+};
 
 }
 
-});
+if(registerBtn){
 
-}
-
-
-// REGISTER
-if (registerBtn) {
-
-registerBtn.addEventListener("click", async () => {
-
-try {
+registerBtn.onclick = async ()=>{
 
 const name = document.getElementById("name").value;
 const email = document.getElementById("email").value;
 const password = document.getElementById("password").value;
 
-const userCred = await createUserWithEmailAndPassword(auth,email,password);
+const user = await createUserWithEmailAndPassword(auth,email,password);
 
-await setDoc(doc(db,"users",userCred.user.uid),{
+await setDoc(doc(db,"users",user.user.uid),{
 
 name:name,
 email:email,
@@ -74,16 +60,10 @@ purchasedCourses:[]
 
 });
 
-alert("Registration successful");
+alert("Registered successfully");
 
-window.location.href = "login.html";
+window.location="login.html";
 
-} catch(err){
-
-alert(err.message);
-
-}
-
-});
+};
 
 }
