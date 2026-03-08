@@ -1,130 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cyber Buddy | Student OS</title>
+<title>Cyber Buddy | Student Console</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 body{
-background:#0b0f1a;
-font-family:'Inter',sans-serif;
+background:#070b14;
+font-family:Inter,sans-serif;
+color:#e2e8f0;
+overflow:hidden;
 }
 
-.glass-card{
-background:rgba(31,41,55,0.4);
-backdrop-filter:blur(8px);
-border:1px solid rgba(255,255,255,0.05);
+/* glass effect */
+
+.glass{
+background:rgba(17,24,39,.5);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.05);
 }
 
-.tab-pane{
-animation:fadeIn .35s ease;
+/* sidebar */
+
+.sidebar-item{
+transition:.2s;
+color:#94a3b8;
 }
 
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(5px)}
-to{opacity:1;transform:translateY(0)}
-}
-
-.nav-item.active{
-background:#2563eb;
+.sidebar-item:hover{
+background:rgba(255,255,255,.04);
 color:white;
 }
 
-</style>
+.sidebar-item.active{
+background:#2563eb;
+color:white;
+box-shadow:0 12px 20px rgba(37,99,235,.35);
+}
 
+/* scroll */
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:#1e293b;border-radius:10px}
+
+/* animation */
+
+.tab{
+animation:fade .35s ease;
+}
+
+@keyframes fade{
+from{opacity:0;transform:translateY(8px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+/* course card */
+
+.course-card{
+transition:.25s;
+}
+
+.course-card:hover{
+transform:translateY(-6px);
+box-shadow:0 20px 30px rgba(0,0,0,.6);
+}
+
+</style>
 </head>
 
-<body class="flex h-screen text-slate-300">
+<body class="flex h-screen">
 
 <!-- SIDEBAR -->
 
-<aside class="w-72 bg-[#0f172a] border-r border-slate-800 flex flex-col">
+<aside class="w-72 bg-[#060a13] border-r border-slate-800 flex flex-col p-6">
 
-<div class="p-8 flex items-center gap-3">
+<div class="flex items-center gap-3 mb-12 px-2">
 
-<div class="h-10 w-10 bg-blue-600 rounded-xl flex items-center justify-center text-white">
+<div class="h-11 w-11 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
 <i class="fas fa-bolt"></i>
 </div>
 
-<h1 class="text-xl font-bold text-white">
-Cyber Buddy
+<h1 class="font-black text-xl tracking-tight">
+CYBER<span class="text-blue-500">BUDDY</span>
 </h1>
 
 </div>
 
+<nav class="flex-1 space-y-2 overflow-y-auto">
 
-<nav class="flex-1 px-4 space-y-1">
+<p class="text-xs text-slate-500 uppercase tracking-widest font-bold px-4 mb-2">Navigation</p>
 
-<p class="text-[10px] uppercase text-slate-500 font-bold px-4 mb-2">Main</p>
-
-<button onclick="switchTab('dashboard',this)"
-class="nav-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm">
-
-<i class="fas fa-home w-5"></i> Dashboard
-
+<button onclick="switchTab('dashboard',this)" class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm">
+<i class="fas fa-th-large w-5"></i> Dashboard
 </button>
 
-<button onclick="switchTab('mycourses',this)"
-class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm">
-
-<i class="fas fa-play-circle w-5"></i> My Learning
-
+<button onclick="switchTab('mycourses',this)" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm">
+<i class="fas fa-play-circle w-5"></i> My Courses
 </button>
 
-<button onclick="switchTab('announcements',this)"
-class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm">
-
-<i class="fas fa-bullhorn w-5"></i> Announcements
-
+<button onclick="switchTab('certificates',this)" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm">
+<i class="fas fa-award w-5"></i> Certificates
 </button>
 
-
-<p class="text-[10px] uppercase text-slate-500 font-bold px-4 mt-6 mb-2">User</p>
-
-<button onclick="switchTab('certificates',this)"
-class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm">
-
-<i class="fas fa-certificate w-5"></i> Certificates
-
+<button onclick="switchTab('billing',this)" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm">
+<i class="fas fa-receipt w-5"></i> Billing
 </button>
 
-<button onclick="switchTab('billing',this)"
-class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm">
-
-<i class="fas fa-file-invoice w-5"></i> Billing
-
+<button onclick="switchTab('profile',this)" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm">
+<i class="fas fa-user-circle w-5"></i> Profile
 </button>
 
-<button onclick="switchTab('profile',this)"
-class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm">
-
-<i class="fas fa-user w-5"></i> Profile
-
-</button>
-
-<button onclick="switchTab('help',this)"
-class="nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm">
-
-<i class="fas fa-headset w-5"></i> Help
-
+<button onclick="switchTab('security',this)" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold text-sm">
+<i class="fas fa-shield-alt w-5"></i> Security
 </button>
 
 </nav>
 
-<div class="p-6">
+<div class="pt-6 border-t border-slate-800">
 
 <button id="logoutBtn"
-class="w-full text-red-400 hover:bg-red-500/10 py-3 rounded-xl">
+class="w-full flex items-center justify-center gap-2 text-red-500 hover:bg-red-500/10 py-3 rounded-xl font-bold">
 
+<i class="fas fa-sign-out-alt"></i>
 Sign Out
 
 </button>
@@ -133,221 +138,145 @@ Sign Out
 
 </aside>
 
-
-
 <!-- MAIN -->
 
-<main class="flex-1 flex flex-col overflow-hidden">
+<main class="flex-1 flex flex-col">
 
-<header class="h-20 flex items-center justify-between px-10 border-b border-slate-800">
+<!-- HEADER -->
+
+<header class="h-24 px-10 flex items-center justify-between border-b border-slate-800 bg-[#070b14]/70 backdrop-blur">
 
 <div>
 
-<h2 id="viewTitle" class="text-lg font-semibold text-white">
-Student Dashboard
-</h2>
+<h2 id="viewTitle" class="text-2xl font-black">Student Dashboard</h2>
 
 <p id="viewSubtitle" class="text-xs text-slate-500">
-Welcome back to your learning path.
+Explore your cybersecurity learning modules
 </p>
 
 </div>
 
+<div class="flex items-center gap-6">
+
+<div class="relative">
+
+<i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 text-xs"></i>
+
 <input id="searchCourse"
 placeholder="Search courses..."
-class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+class="bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm w-72 focus:border-blue-500 outline-none">
+
+</div>
+
+<div class="h-10 w-10 bg-slate-800 rounded-xl flex items-center justify-center text-blue-500 border border-slate-700">
+<i class="fas fa-bell"></i>
+</div>
+
+</div>
 
 </header>
 
-
+<!-- CONTENT -->
 
 <div class="flex-1 overflow-y-auto p-10 space-y-10">
 
 <!-- DASHBOARD -->
 
-<section id="dashboard" class="tab-pane space-y-8">
+<section id="dashboard" class="tab space-y-8">
 
-<div class="grid grid-cols-3 gap-6">
+<!-- stats -->
 
-<div class="glass-card p-6 rounded-2xl">
-<p class="text-xs text-slate-500">Courses Enrolled</p>
-<h3 id="statCourses" class="text-2xl font-bold text-white">0</h3>
+<div class="grid md:grid-cols-3 gap-6">
+
+<div class="glass p-6 rounded-2xl">
+<p class="text-xs text-slate-500 uppercase font-bold">Courses Enrolled</p>
+<h3 id="statCourses" class="text-3xl font-black mt-2">0</h3>
 </div>
 
-<div class="glass-card p-6 rounded-2xl">
-<p class="text-xs text-slate-500">Lessons Completed</p>
-<h3 class="text-2xl font-bold text-white">23</h3>
+<div class="glass p-6 rounded-2xl">
+<p class="text-xs text-slate-500 uppercase font-bold">Certificates</p>
+<h3 id="statCerts" class="text-3xl font-black mt-2">0</h3>
 </div>
 
-<div class="glass-card p-6 rounded-2xl">
-<p class="text-xs text-slate-500">Certificates</p>
-<h3 id="statCertificates" class="text-2xl font-bold text-white">0</h3>
+<div class="glass p-6 rounded-2xl">
+<p class="text-xs text-slate-500 uppercase font-bold">Learning Hours</p>
+<h3 class="text-3xl font-black mt-2">24</h3>
 </div>
 
 </div>
 
+<h3 class="text-xl font-bold">Available Courses</h3>
 
-<h3 class="text-xl font-bold text-white">
-Available Courses
-</h3>
-
-<div id="coursesGrid"
-class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-</div>
+<div id="coursesGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
 
 </section>
-
-
 
 <!-- MY COURSES -->
 
-<section id="mycourses" class="tab-pane hidden">
+<section id="mycourses" class="tab hidden space-y-6">
 
-<h3 class="text-xl font-bold text-white mb-6">
-My Learning
-</h3>
+<h3 class="text-xl font-bold">My Learning Path</h3>
 
-<div id="myCoursesGrid"
-class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-</div>
+<div id="myCoursesGrid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-8"></div>
 
 </section>
-
-
-
-<!-- ANNOUNCEMENTS -->
-
-<section id="announcements" class="tab-pane hidden">
-
-<div class="glass-card p-6 rounded-2xl">
-
-<h3 class="font-bold text-white">
-Upcoming CTF Event
-</h3>
-
-<p class="text-sm text-slate-400 mt-2">
-Join Cyber Buddy HackQuest CTF next week.
-</p>
-
-</div>
-
-</section>
-
-
 
 <!-- CERTIFICATES -->
 
-<section id="certificates" class="tab-pane hidden">
+<section id="certificates" class="tab hidden space-y-6">
 
-<h3 class="text-xl font-bold text-white mb-6">
-Certificates
-</h3>
+<h3 class="text-xl font-bold">Certificates</h3>
 
-<div id="certificatesGrid" class="space-y-4">
-
-<div class="glass-card p-6 rounded-xl flex justify-between">
-
-<div>
-
-<h4 class="font-bold text-white">
-Web Application Pentesting
-</h4>
-
-<p class="text-xs text-slate-400">
-Completed
-</p>
-
-</div>
-
-<button onclick="downloadCertificate('web-pentesting')"
-class="bg-blue-600 px-4 py-2 rounded-xl text-xs">
-
-Download
-
-</button>
-
-</div>
-
-</div>
+<div id="certList" class="space-y-4"></div>
 
 </section>
-
-
 
 <!-- BILLING -->
 
-<section id="billing" class="tab-pane hidden">
+<section id="billing" class="tab hidden space-y-6">
 
-<h3 class="text-xl font-bold text-white mb-6">
-Billing & Invoices
-</h3>
+<h3 class="text-xl font-bold">Invoices</h3>
 
-<div id="billingGrid" class="space-y-4">
-
-<div class="glass-card p-6 rounded-xl flex justify-between">
-
-<div>
-
-<h4 class="font-bold text-white">
-Network Security Course
-</h4>
-
-<p class="text-xs text-slate-400">
-Purchased Feb 2026
-</p>
-
-</div>
-
-<button onclick="downloadInvoice('network-security')"
-class="bg-indigo-600 px-4 py-2 rounded-xl text-xs">
-
-Download
-
-</button>
-
-</div>
-
-</div>
+<div id="invoiceList" class="space-y-4"></div>
 
 </section>
-
-
 
 <!-- PROFILE -->
 
-<section id="profile" class="tab-pane hidden">
+<section id="profile" class="tab hidden">
 
-<div class="glass-card p-8 rounded-2xl max-w-lg">
+<div class="max-w-xl glass rounded-2xl p-8 flex items-center gap-6">
 
-<h3 id="userName"
-class="text-2xl font-bold text-white">
-Loading...
-</h3>
+<div class="h-20 w-20 bg-blue-600 rounded-xl flex items-center justify-center text-3xl font-black">
+M
+</div>
 
-<p id="userEmail"
-class="text-slate-400">
-Loading...
-</p>
+<div>
+
+<h3 id="userName" class="text-2xl font-bold">Loading...</h3>
+
+<p id="userEmail" class="text-slate-500">Loading...</p>
+
+</div>
 
 </div>
 
 </section>
 
+<!-- SECURITY -->
 
+<section id="security" class="tab hidden">
 
-<!-- HELP -->
+<div class="glass p-10 rounded-2xl max-w-xl">
 
-<section id="help" class="tab-pane hidden">
+<h3 class="text-xl font-bold mb-6">Account Security</h3>
 
-<div class="glass-card p-6 rounded-2xl">
+<button id="resetBtn"
+class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-xl font-bold">
 
-<h3 class="font-bold text-white">
-Support
-</h3>
+Send Password Reset Link
 
-<p class="text-sm text-slate-400">
-Contact Cyber Buddy support for help.
-</p>
+</button>
 
 </div>
 
@@ -357,19 +286,29 @@ Contact Cyber Buddy support for help.
 
 </main>
 
-
-
 <script type="module" src="js/dashboard.js"></script>
 
 <script>
 
-window.switchTab=(id,btn)=>{
+function switchTab(id,btn){
 
-document.querySelectorAll(".tab-pane").forEach(t=>t.classList.add("hidden"))
+document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"))
 document.getElementById(id).classList.remove("hidden")
 
-document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"))
+document.querySelectorAll(".sidebar-item").forEach(i=>i.classList.remove("active"))
 btn.classList.add("active")
+
+const meta={
+dashboard:["Student Dashboard","Explore cybersecurity modules"],
+mycourses:["My Learning","Continue your training"],
+certificates:["Certificates","Download your achievements"],
+billing:["Billing","Access invoices and payments"],
+profile:["Profile","Manage your account"],
+security:["Security","Protect your account"]
+}
+
+document.getElementById("viewTitle").innerText=meta[id][0]
+document.getElementById("viewSubtitle").innerText=meta[id][1]
 
 }
 
