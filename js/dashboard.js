@@ -4,39 +4,41 @@ import {
 collection,
 getDocs,
 doc,
-getDoc,
 onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
-signOut,
-sendPasswordResetEmail
+signOut
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
-const coursesGrid=document.getElementById("coursesGrid");
-const myCoursesGrid=document.getElementById("myCoursesGrid");
+const coursesGrid = document.getElementById("coursesGrid");
+const myCoursesGrid = document.getElementById("myCoursesGrid");
 
-let userData;
+let userData = null;
 
 
-/* AUTH */
+/* AUTH CHECK */
 
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async (user) => {
 
 if(!user){
 window.location="login.html";
 return;
 }
 
-const ref=doc(db,"users",user.uid);
+/* realtime user listener */
 
-onSnapshot(ref,(snap)=>{
+const userRef = doc(db,"users",user.uid);
 
-userData=snap.data();
+onSnapshot(userRef,(snap)=>{
+
+userData = snap.data();
+
+/* reload courses whenever admin grants */
 
 loadCourses();
 
@@ -49,40 +51,59 @@ loadCourses();
 
 async function loadCourses(){
 
-coursesGrid.innerHTML="";
-myCoursesGrid.innerHTML="";
+if(!userData) return;
 
-const courses=await getDocs(collection(db,"courses"));
+coursesGrid.innerHTML = "";
+myCoursesGrid.innerHTML = "";
 
-courses.forEach(course=>{
+const coursesSnap = await getDocs(collection(db,"courses"));
 
-const data=course.data();
-const id=course.id;
+coursesSnap.forEach(course => {
 
-const access=userData.purchasedCourses?.includes(id);
+const data = course.data();
+const courseId = course.id;
 
-const card=`
+/* correct unlock logic */
 
-<div class="glass rounded-xl overflow-hidden">
+const hasAccess =
+userData.purchasedCourses &&
+userData.purchasedCourses.includes(courseId);
 
-<img src="${data.image}"
-class="h-40 w-full object-cover">
 
-<div class="p-4">
+/* course card */
 
-<h3 class="font-bold">${data.title}</h3>
+const card = `
+
+<div class="glass rounded-xl overflow-hidden border border-slate-800 hover:border-cyan-400 transition">
+
+<img src="${data.image || 'https://via.placeholder.com/400x200'}"
+class="w-full h-40 object-cover">
+
+<div class="p-5">
+
+<h3 class="font-bold text-lg mb-2">
+${data.title}
+</h3>
 
 <p class="text-sm text-slate-400 mb-4">
-${data.description||""}
+${data.description || ""}
 </p>
 
 ${
-access
+hasAccess
 ?
-`<a href="course.html?id=${id}"
-class="bg-cyan-500 px-4 py-2 rounded">Start Learning</a>`
+`<a href="course.html?id=${courseId}"
+class="bg-cyan-400 text-black px-4 py-2 rounded-lg text-sm font-bold">
+
+Start Learning
+
+</a>`
 :
-`<button class="bg-slate-700 px-4 py-2 rounded">Locked</button>`
+`<button class="bg-slate-700 px-4 py-2 rounded-lg text-sm text-slate-400">
+
+Locked
+
+</button>`
 }
 
 </div>
@@ -91,62 +112,27 @@ class="bg-cyan-500 px-4 py-2 rounded">Start Learning</a>`
 
 `;
 
-coursesGrid.innerHTML+=card;
+coursesGrid.innerHTML += card;
 
-if(access){
-myCoursesGrid.innerHTML+=card;
+/* populate My Courses tab */
+
+if(hasAccess){
+
+myCoursesGrid.innerHTML += card;
+
 }
 
 });
 
 }
-
-
-
-/* SIDEBAR TOGGLE */
-
-document.getElementById("toggleSidebar").onclick=()=>{
-document.getElementById("sidebar").classList.toggle("collapsed");
-};
-
-
-
-/* TAB SWITCHING */
-
-document.querySelectorAll(".navBtn").forEach(btn=>{
-
-btn.onclick=()=>{
-
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-
-document.getElementById(btn.dataset.tab).classList.add("active");
-
-};
-
-});
-
 
 
 /* LOGOUT */
 
-document.getElementById("logoutBtn").onclick=async()=>{
+document.getElementById("logoutBtn").onclick = async ()=>{
 
 await signOut(auth);
 
 window.location="login.html";
-
-};
-
-
-
-/* PASSWORD RESET */
-
-document.getElementById("resetBtn").onclick=async()=>{
-
-const user=auth.currentUser;
-
-await sendPasswordResetEmail(auth,user.email);
-
-alert("Password reset email sent");
 
 };
