@@ -6,21 +6,18 @@ getDocs,
 doc,
 getDoc,
 updateDoc
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
 signOut,
 sendPasswordResetEmail
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 const coursesGrid = document.getElementById("coursesGrid");
 const myCoursesGrid = document.getElementById("myCoursesGrid");
 
-let purchasedCourses=[];
+let purchasedCourses = [];
 
 
 /* AUTH */
@@ -34,20 +31,22 @@ return;
 
 }
 
-const userDoc=await getDoc(doc(db,"users",user.uid));
-const data=userDoc.data();
+const userDoc = await getDoc(doc(db,"users",user.uid));
+const data = userDoc.data();
 
-document.getElementById("userName").innerText=data.name;
-document.getElementById("userEmail").innerText=data.email;
+document.getElementById("userName").innerText = data.name || "User";
+document.getElementById("userEmail").innerText = data.email || "";
 
-purchasedCourses=data.purchasedCourses || [];
+document.getElementById("editName").value = data.name || "";
+document.getElementById("editPhone").value = data.phone || "";
 
-document.getElementById("statCourses").innerText=purchasedCourses.length;
+purchasedCourses = data.purchasedCourses || [];
+
+document.getElementById("statCourses").innerText = purchasedCourses.length;
 
 loadCourses();
 
 });
-
 
 
 /* LOAD COURSES */
@@ -57,14 +56,14 @@ async function loadCourses(){
 coursesGrid.innerHTML="";
 myCoursesGrid.innerHTML="";
 
-const snap=await getDocs(collection(db,"courses"));
+const snap = await getDocs(collection(db,"courses"));
 
 snap.forEach(course=>{
 
-const data=course.data();
-const id=course.id;
+const data = course.data();
+const id = course.id;
 
-const card=document.createElement("div");
+const card = document.createElement("div");
 
 card.className="course-card glass p-5 rounded-xl";
 
@@ -92,15 +91,12 @@ Start Learning
 coursesGrid.appendChild(card);
 
 if(purchasedCourses.includes(id)){
-
 myCoursesGrid.appendChild(card.cloneNode(true));
-
 }
 
 });
 
 }
-
 
 
 /* COURSE PAGE */
@@ -112,7 +108,6 @@ window.location="course.html?id="+id;
 };
 
 
-
 /* SEARCH */
 
 document.getElementById("searchCourse").addEventListener("input",function(){
@@ -121,7 +116,8 @@ const val=this.value.toLowerCase();
 
 document.querySelectorAll("#coursesGrid > div").forEach(card=>{
 
-card.style.display=card.innerText.toLowerCase().includes(val)
+card.style.display =
+card.innerText.toLowerCase().includes(val)
 ? ""
 : "none";
 
@@ -130,12 +126,32 @@ card.style.display=card.innerText.toLowerCase().includes(val)
 });
 
 
+/* PROFILE UPDATE */
+
+document.getElementById("saveProfile").onclick = async ()=>{
+
+const name = document.getElementById("editName").value;
+const phone = document.getElementById("editPhone").value;
+
+const user = auth.currentUser;
+
+await updateDoc(doc(db,"users",user.uid),{
+name:name,
+phone:phone
+});
+
+document.getElementById("userName").innerText=name;
+
+alert("Profile updated");
+
+};
+
 
 /* PASSWORD RESET */
 
-document.getElementById("resetBtn").onclick=async()=>{
+document.getElementById("resetBtn").onclick = async ()=>{
 
-const user=auth.currentUser;
+const user = auth.currentUser;
 
 await sendPasswordResetEmail(auth,user.email);
 
@@ -144,56 +160,39 @@ alert("Reset link sent to "+user.email);
 };
 
 
-
-/* PROFILE UPDATE */
-
-document.getElementById("saveProfile").onclick=async()=>{
-
-const name=document.getElementById("editName").value;
-const phone=document.getElementById("editPhone").value;
-
-const user=auth.currentUser;
-
-await updateDoc(doc(db,"users",user.uid),{
-
-name,
-phone
-
-});
-
-alert("Profile updated");
-
-};
-
-
-
 /* CERTIFICATES */
 
 async function loadCertificates(){
 
-const res=await fetch("/data/certificates.json");
+const res = await fetch(
+"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
+);
 
-const data=await res.json();
+const data = await res.json();
 
-const user=auth.currentUser;
+const user = auth.currentUser;
 
-const list=document.getElementById("certList");
+const list = document.getElementById("certList");
 
 list.innerHTML="";
 
-data.filter(c=>c.email===user.email)
-.forEach(c=>{
+data.certificates
+.filter(c => c.email === user.email)
+.forEach(cert=>{
 
 list.innerHTML+=`
 
 <div class="glass p-4 rounded-xl flex justify-between">
 
-<span>${c.course}</span>
+<div>
+<h4 class="font-bold">${cert.course}</h4>
+<p class="text-xs text-slate-400">${cert.type}</p>
+</div>
 
-<a href="${c.url}" target="_blank"
-class="bg-blue-600 px-4 py-2 rounded-lg">
+<a href="certificate.html?id=${cert.certId}"
+class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold">
 
-Download
+View
 
 </a>
 
@@ -204,36 +203,44 @@ Download
 });
 
 }
-
 
 
 /* BILLING */
 
 async function loadInvoices(){
 
-const res=await fetch("/data/bill.json");
+const res = await fetch(
+"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
+);
 
-const data=await res.json();
+const bills = await res.json();
 
-const user=auth.currentUser;
+const user = auth.currentUser;
 
-const list=document.getElementById("invoiceList");
+const list = document.getElementById("invoiceList");
 
 list.innerHTML="";
 
-data.filter(i=>i.email===user.email)
-.forEach(i=>{
+bills
+.filter(b => b.email === user.email)
+.forEach(bill=>{
 
 list.innerHTML+=`
 
 <div class="glass p-4 rounded-xl flex justify-between">
 
-<span>${i.course}</span>
+<div>
+<h4 class="font-bold">${bill.course}</h4>
+<p class="text-xs text-slate-400">
+₹${bill.amount} • ${bill.date}
+</p>
+</div>
 
-<a href="${i.invoice}" target="_blank"
-class="bg-green-600 px-4 py-2 rounded-lg">
+<a href="${bill.verifyUrl}"
+target="_blank"
+class="bg-green-600 px-4 py-2 rounded-lg text-xs font-bold">
 
-Invoice
+Verify
 
 </a>
 
@@ -245,6 +252,27 @@ Invoice
 
 }
 
+
+/* SIDEBAR TOGGLE */
+
+const sidebar = document.getElementById("sidebar");
+const toggle = document.getElementById("toggleSidebar");
+
+toggle.onclick=()=>{
+
+if(sidebar.classList.contains("w-72")){
+
+sidebar.classList.remove("w-72");
+sidebar.classList.add("w-16");
+
+}else{
+
+sidebar.classList.remove("w-16");
+sidebar.classList.add("w-72");
+
+}
+
+};
 
 
 /* LOGOUT */
