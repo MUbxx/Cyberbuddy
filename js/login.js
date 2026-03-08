@@ -4,114 +4,87 @@ import {
 signInWithEmailAndPassword,
 GoogleAuthProvider,
 signInWithPopup,
-sendPasswordResetEmail,
-onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+sendPasswordResetEmail
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 import {
 doc,
-setDoc,
-getDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-
-const loginBtn = document.getElementById("loginBtn");
-const googleBtn = document.getElementById("googleLoginBtn");
-const forgotBtn = document.getElementById("forgotBtn");
-
-
-/* AUTO REDIRECT IF LOGGED */
-
-onAuthStateChanged(auth,(user)=>{
-
-if(user){
-window.location="dashboard.html";
+getDoc,
+setDoc
 }
-
-});
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 
 /* EMAIL LOGIN */
 
-loginBtn.onclick = async () => {
+document.getElementById("loginBtn").onclick = async () => {
 
-const email=document.getElementById("email").value;
-const password=document.getElementById("password").value;
-
-if(!email || !password){
-alert("Please enter email and password");
-return;
-}
-
-loginBtn.innerText="Logging in...";
-loginBtn.disabled=true;
+const email = document.getElementById("email").value;
+const password = document.getElementById("password").value;
 
 try{
 
-await signInWithEmailAndPassword(auth,email,password);
+const result = await signInWithEmailAndPassword(auth,email,password);
 
-window.location="dashboard.html";
+await redirectUser(result.user);
 
-}
-catch(err){
-
-console.error(err);
+}catch(err){
 
 alert(err.message);
 
 }
 
-loginBtn.innerText="Login";
-loginBtn.disabled=false;
-
 };
 
 
+/* GOOGLE LOGIN */
 
-/* GOOGLE OAUTH */
+document.getElementById("googleBtn").onclick = async () => {
 
-googleBtn.onclick = async () => {
-
-const provider=new GoogleAuthProvider();
+const provider = new GoogleAuthProvider();
 
 try{
 
-const result=await signInWithPopup(auth,provider);
+const result = await signInWithPopup(auth,provider);
 
-const user=result.user;
+const user = result.user;
 
-const ref=doc(db,"users",user.uid);
-const snap=await getDoc(ref);
+const ref = doc(db,"users",user.uid);
+const snap = await getDoc(ref);
 
 if(!snap.exists()){
+
+let role="user";
+
+if(user.email==="admin@cyberbuddy.com"){
+role="admin";
+}
 
 await setDoc(ref,{
 name:user.displayName,
 email:user.email,
-phone:"",
+role:role,
 purchasedCourses:[],
 createdAt:new Date()
 });
 
 }
 
-window.location="dashboard.html";
+await redirectUser(user);
 
-}
-catch(err){
+}catch(err){
 
-console.error(err);
-alert("Google Login Failed");
+alert(err.message);
 
 }
 
 };
 
 
-
 /* PASSWORD RESET */
 
-forgotBtn.onclick = async ()=>{
+document.getElementById("forgotBtn").onclick = async () => {
 
 const email=document.getElementById("email").value;
 
@@ -124,13 +97,36 @@ try{
 
 await sendPasswordResetEmail(auth,email);
 
-alert("Password reset link sent to your email");
+alert("Password reset email sent");
 
-}
-catch(err){
+}catch(err){
 
 alert(err.message);
 
 }
 
 };
+
+
+
+/* REDIRECT LOGIC */
+
+async function redirectUser(user){
+
+const ref = doc(db,"users",user.uid);
+
+const snap = await getDoc(ref);
+
+const data = snap.data();
+
+if(data.role === "admin"){
+
+window.location="admin.html";
+
+}else{
+
+window.location="dashboard.html";
+
+}
+
+}
