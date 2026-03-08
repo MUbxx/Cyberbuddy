@@ -179,7 +179,7 @@ list.innerHTML+=`
 
 </div>
 
-<a href="certificate.html?id=${cert.certId}"
+<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?certid=${cert.certId}"
 class="bg-blue-600 px-4 py-2 rounded-lg text-xs">
 
 View
@@ -291,3 +291,4 @@ await signOut(auth)
 window.location="login.html"
 
 }
+
