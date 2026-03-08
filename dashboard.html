@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -21,7 +22,7 @@ font-family:Inter,sans-serif;
 overflow:hidden;
 }
 
-/* glass */
+/* glass card */
 
 .glass{
 background:rgba(17,24,39,.6);
@@ -29,18 +30,38 @@ backdrop-filter:blur(10px);
 border:1px solid rgba(255,255,255,.05);
 }
 
-/* sidebar */
+/* SIDEBAR */
 
 #sidebar{
-transition:all .3s ease;
+transition:width .3s ease;
+width:288px;
+min-width:288px;
 }
 
 #sidebar.collapsed{
-width:80px;
+width:85px;
+min-width:85px;
+padding:1.5rem 1rem;
 }
 
-#sidebar.collapsed span{
+/* hide labels */
+
+#sidebar.collapsed span,
+#sidebar.collapsed h1{
 display:none;
+}
+
+/* center icons */
+
+#sidebar.collapsed .sidebar-item{
+justify-content:center;
+padding-left:0;
+padding-right:0;
+}
+
+#sidebar.collapsed .sidebar-item i{
+margin:0;
+font-size:1.25rem;
 }
 
 .sidebar-item{
@@ -64,14 +85,16 @@ box-shadow:0 15px 25px rgba(0,0,0,.6);
 }
 
 </style>
+
 </head>
+
 
 <body class="flex h-screen">
 
 <!-- SIDEBAR -->
 
 <aside id="sidebar"
-class="w-72 bg-[#060a13] border-r border-slate-800 flex flex-col p-6">
+class="bg-[#060a13] border-r border-slate-800 flex flex-col p-6">
 
 <div class="flex items-center justify-between mb-8">
 
@@ -104,6 +127,7 @@ class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
 </button>
 
+
 <button onclick="switchTab('mycourses',this)"
 class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
@@ -111,6 +135,7 @@ class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 <span>My Courses</span>
 
 </button>
+
 
 <button onclick="switchTab('certificates',this)"
 class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
@@ -120,6 +145,7 @@ class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
 </button>
 
+
 <button onclick="switchTab('billing',this)"
 class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
@@ -128,6 +154,7 @@ class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
 </button>
 
+
 <button onclick="switchTab('profile',this)"
 class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
@@ -135,6 +162,7 @@ class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 <span>Profile</span>
 
 </button>
+
 
 <button onclick="switchTab('security',this)"
 class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
@@ -157,6 +185,7 @@ class="text-red-500 mt-6 py-3 rounded-xl hover:bg-red-500/10">
 </aside>
 
 
+
 <!-- MAIN -->
 
 <main class="flex-1 flex flex-col">
@@ -173,6 +202,7 @@ class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-sm">
 
 
 <div class="flex-1 overflow-y-auto p-10 space-y-10">
+
 
 <!-- DASHBOARD -->
 
@@ -281,8 +311,8 @@ document.getElementById(id).classList.remove("hidden")
 document.querySelectorAll(".sidebar-item").forEach(b=>b.classList.remove("active"))
 btn.classList.add("active")
 
-if(id==="certificates") loadCertificates()
-if(id==="billing") loadInvoices()
+if(id==="certificates") window.loadCertificates()
+if(id==="billing") window.loadInvoices()
 
 }
 
