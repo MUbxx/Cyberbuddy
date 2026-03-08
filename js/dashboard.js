@@ -4,291 +4,72 @@ import {
 collection,
 getDocs,
 doc,
-getDoc,
-updateDoc
+getDoc
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
-onAuthStateChanged,
-signOut,
-sendPasswordResetEmail
+onAuthStateChanged
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-const coursesGrid=document.getElementById("coursesGrid");
-const myCoursesGrid=document.getElementById("myCoursesGrid");
 
-let purchasedCourses=[];
+const grid = document.getElementById("coursesGrid");
 
 
-/* AUTH */
-
-onAuthStateChanged(auth,async(user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
+
 window.location="login.html";
 return;
+
 }
 
-const userDoc=await getDoc(doc(db,"users",user.uid));
-const data=userDoc.data();
+const userRef = doc(db,"users",user.uid);
+const userSnap = await getDoc(userRef);
+const userData = userSnap.data();
 
-document.getElementById("userName").innerText=data.name||"User";
-document.getElementById("userEmail").innerText=data.email||"";
-
-document.getElementById("editName").value=data.name||"";
-document.getElementById("editPhone").value=data.phone||"";
-
-purchasedCourses=data.purchasedCourses||[];
-
-loadCourses();
+loadCourses(userData);
 
 });
 
 
-/* COURSES */
 
-async function loadCourses(){
+async function loadCourses(userData){
 
-coursesGrid.innerHTML="";
-myCoursesGrid.innerHTML="";
+const coursesSnap = await getDocs(collection(db,"courses"));
 
-const snap=await getDocs(collection(db,"courses"));
+grid.innerHTML="";
 
-snap.forEach(course=>{
+coursesSnap.forEach(course=>{
 
-const data=course.data();
-const id=course.id;
+const data = course.data();
 
-const card=document.createElement("div");
+const hasAccess = userData.purchasedCourses?.includes(course.id);
 
-card.className="glass p-5 rounded-xl";
+grid.innerHTML += `
 
-card.innerHTML=`
+<div class="bg-gray-800 rounded-lg p-4">
 
-<img src="${data.image}"
-class="h-40 w-full object-cover rounded-lg mb-4">
+<img src="${data.image}" class="rounded mb-3">
 
-<h3 class="font-bold">${data.title}</h3>
+<h3 class="font-bold text-lg">${data.title}</h3>
 
-<p class="text-xs text-slate-400 mt-2">
-${data.description||""}
-</p>
+<p class="text-gray-400 text-sm mb-3">${data.description}</p>
 
-<button onclick="openCourse('${id}')"
-class="mt-4 bg-blue-600 px-4 py-2 rounded-lg text-sm">
+${
+hasAccess
+?
+`<a href="course-player.html?id=${course.id}" class="bg-cyan-400 text-black px-4 py-2 rounded">Start Learning</a>`
+:
+`<button class="bg-gray-600 px-4 py-2 rounded">Locked</button>`
+}
 
-Start Learning
-
-</button>
+</div>
 
 `;
 
-coursesGrid.appendChild(card);
-
-if(purchasedCourses.includes(id)){
-myCoursesGrid.appendChild(card.cloneNode(true))
-}
-
-})
+});
 
 }
-
-
-/* COURSE */
-
-window.openCourse=(id)=>{
-window.location="course.html?id="+id
-}
-
-
-/* PROFILE UPDATE */
-
-document.getElementById("saveProfile").onclick=async()=>{
-
-const name=document.getElementById("editName").value
-const phone=document.getElementById("editPhone").value
-
-const user=auth.currentUser
-
-await updateDoc(doc(db,"users",user.uid),{
-name,
-phone
-})
-
-alert("Profile updated")
-
-}
-
-
-/* PASSWORD RESET */
-
-document.getElementById("resetBtn").onclick=async()=>{
-
-const user=auth.currentUser
-
-await sendPasswordResetEmail(auth,user.email)
-
-alert("Reset link sent")
-
-}
-
-
-/* CERTIFICATES */
-
-window.loadCertificates = async () => {
-
-const list = document.getElementById("certList")
-
-list.innerHTML="Loading..."
-
-try{
-
-const res = await fetch(
-"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
-)
-
-const data = await res.json()
-
-const user = auth.currentUser
-
-const userCerts=data.certificates.filter(c=>c.email===user.email)
-
-list.innerHTML=""
-
-if(userCerts.length===0){
-
-list.innerHTML="No certificates available"
-
-return
-
-}
-
-userCerts.forEach(cert=>{
-
-list.innerHTML+=`
-
-<div class="glass p-4 rounded-xl flex justify-between">
-
-<div>
-
-<h4 class="font-bold text-blue-400">${cert.course}</h4>
-
-<p class="text-xs text-slate-400">${cert.type}</p>
-
-</div>
-
-<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?certid=${cert.certId}"
-class="bg-blue-600 px-4 py-2 rounded-lg text-xs">
-
-View
-
-</a>
-
-</div>
-
-`
-
-})
-
-}catch(err){
-
-list.innerHTML="Error loading certificates"
-console.error(err)
-
-}
-
-}
-
-
-
-/* BILLING */
-
-window.loadInvoices = async () => {
-
-const list=document.getElementById("invoiceList")
-
-list.innerHTML="Loading..."
-
-try{
-
-const res=await fetch(
-"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
-)
-
-const bills=await res.json()
-
-const user=auth.currentUser
-
-const userBills=bills.filter(b=>b.email===user.email)
-
-list.innerHTML=""
-
-if(userBills.length===0){
-
-list.innerHTML="No billing history"
-return
-
-}
-
-userBills.forEach(bill=>{
-
-list.innerHTML+=`
-
-<div class="glass p-4 rounded-xl flex justify-between">
-
-<div>
-
-<h4 class="font-bold text-green-400">${bill.course}</h4>
-
-<p class="text-xs text-slate-400">
-₹${bill.amount} • ${bill.date}
-</p>
-
-</div>
-
-<a href="${bill.verifyUrl}"
-target="_blank"
-class="bg-green-600 px-4 py-2 rounded-lg text-xs">
-
-Verify
-
-</a>
-
-</div>
-
-`
-
-})
-
-}catch(err){
-
-list.innerHTML="Error loading billing data"
-console.error(err)
-
-}
-
-}
-
-
-/* SIDEBAR */
-
-const sidebar=document.getElementById("sidebar")
-const toggle=document.getElementById("toggleSidebar")
-
-toggle.onclick=()=>{
-sidebar.classList.toggle("collapsed")
-}
-
-
-/* LOGOUT */
-
-document.getElementById("logoutBtn").onclick=async()=>{
-
-await signOut(auth)
-
-window.location="login.html"
-
-}
-
