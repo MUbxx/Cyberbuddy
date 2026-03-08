@@ -28,10 +28,8 @@ let purchasedCourses=[];
 onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
-
 window.location="login.html";
 return;
-
 }
 
 const userDoc=await getDoc(doc(db,"users",user.uid));
@@ -99,7 +97,7 @@ myCoursesGrid.appendChild(card.cloneNode(true))
 }
 
 
-/* COURSE PAGE */
+/* COURSE */
 
 window.openCourse=(id)=>{
 window.location="course.html?id="+id
@@ -123,7 +121,7 @@ card.innerText.toLowerCase().includes(val)
 })
 
 
-/* PROFILE UPDATE */
+/* PROFILE */
 
 document.getElementById("saveProfile").onclick=async()=>{
 
@@ -137,12 +135,12 @@ name,
 phone
 })
 
-alert("Profile Updated")
+alert("Profile updated")
 
 }
 
 
-/* PASSWORD RESET */
+/* RESET PASSWORD */
 
 document.getElementById("resetBtn").onclick=async()=>{
 
@@ -159,15 +157,13 @@ alert("Reset link sent")
 
 window.loadCertificates=async()=>{
 
-try{
-
-const user=auth.currentUser
-
 const res=await fetch(
 "https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
 )
 
 const data=await res.json()
+
+const user=auth.currentUser
 
 const list=document.getElementById("certList")
 
@@ -202,12 +198,6 @@ View
 
 })
 
-}catch(err){
-
-console.error("Certificate Error",err)
-
-}
-
 }
 
 
@@ -215,15 +205,13 @@ console.error("Certificate Error",err)
 
 window.loadInvoices=async()=>{
 
-try{
-
-const user=auth.currentUser
-
 const res=await fetch(
 "https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
 )
 
 const bills=await res.json()
+
+const user=auth.currentUser
 
 const list=document.getElementById("invoiceList")
 
@@ -242,9 +230,7 @@ list.innerHTML+=`
 <h4 class="font-bold">${bill.course}</h4>
 
 <p class="text-xs text-slate-400">
-
 ₹${bill.amount} • ${bill.date}
-
 </p>
 
 </div>
@@ -263,12 +249,6 @@ Verify
 
 })
 
-}catch(err){
-
-console.error("Billing Error",err)
-
-}
-
 }
 
 
@@ -278,9 +258,7 @@ const sidebar=document.getElementById("sidebar")
 const toggle=document.getElementById("toggleSidebar")
 
 toggle.onclick=()=>{
-
-sidebar.classList.toggle("-ml-72")
-
+sidebar.classList.toggle("collapsed")
 }
 
 
