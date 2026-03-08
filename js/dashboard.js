@@ -16,7 +16,6 @@ sendPasswordResetEmail
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-
 const coursesGrid=document.getElementById("coursesGrid");
 const myCoursesGrid=document.getElementById("myCoursesGrid");
 
@@ -104,7 +103,7 @@ window.location="course.html?id="+id
 }
 
 
-/* PROFILE */
+/* PROFILE UPDATE */
 
 document.getElementById("saveProfile").onclick=async()=>{
 
@@ -141,6 +140,7 @@ alert("Reset link sent")
 window.loadCertificates = async () => {
 
 const list = document.getElementById("certList")
+
 list.innerHTML="Loading..."
 
 try{
@@ -208,6 +208,7 @@ console.error(err)
 window.loadInvoices = async () => {
 
 const list=document.getElementById("invoiceList")
+
 list.innerHTML="Loading..."
 
 try{
