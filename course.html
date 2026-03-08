@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Course</title>
+</head>
+
+<body>
+
+<iframe id="video" width="900" height="500"></iframe>
+
+<script type="module">
+
+import { db } from "./js/firebase.js";
+
+import { doc,getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const params=new URLSearchParams(window.location.search);
+
+const id=params.get("id");
+
+const snap=await getDoc(doc(db,"courses",id));
+
+document.getElementById("video").src=snap.data().video;
+
+</script>
+
+</body>
+</html>
