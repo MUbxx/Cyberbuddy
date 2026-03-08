@@ -1,61 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cyber Buddy Academy</title>
+<title>Cyber Buddy Dashboard</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<style>
+
+body{
+background:#0f172a;
+}
+
+.sidebar{
+background:#111827;
+}
+
+.card{
+transition:all .25s ease;
+}
+
+.card:hover{
+transform:translateY(-5px);
+box-shadow:0 15px 25px rgba(0,0,0,.4);
+}
+
+</style>
+
 </head>
 
-<body class="bg-gray-900 text-white min-h-screen">
+<body class="text-gray-100 flex">
 
-<!-- NAVBAR -->
+<!-- SIDEBAR -->
 
-<header class="flex justify-between items-center p-4 border-b border-gray-700 bg-gray-950">
+<aside class="sidebar w-64 min-h-screen p-6 space-y-6">
 
-<h1 class="text-cyan-400 text-xl font-bold">
-Cyber Buddy Academy
+<h1 class="text-2xl font-bold text-cyan-400">
+Cyber Buddy
 </h1>
 
-<nav class="flex gap-6 items-center">
+<nav class="space-y-2">
 
-<button onclick="showSection('dashboard')" class="hover:text-cyan-400">
+<button onclick="showTab('dashboard')" class="block w-full text-left hover:text-cyan-400">
 Dashboard
 </button>
 
-<button onclick="showSection('courses')" class="hover:text-cyan-400">
+<button onclick="showTab('mycourses')" class="block w-full text-left hover:text-cyan-400">
 My Courses
 </button>
 
-<button onclick="showSection('profile')" class="hover:text-cyan-400">
+<button onclick="showTab('profile')" class="block w-full text-left hover:text-cyan-400">
 Profile
 </button>
 
-<button id="logoutBtn"
-class="bg-red-500 px-3 py-1 rounded hover:bg-red-600">
-Logout
+<button onclick="showTab('settings')" class="block w-full text-left hover:text-cyan-400">
+Settings
 </button>
 
 </nav>
 
-</header>
+<button id="logoutBtn"
+class="bg-red-500 px-3 py-2 rounded text-sm">
+
+Logout
+
+</button>
+
+</aside>
 
 
 
-<!-- DASHBOARD SECTION -->
+<main class="flex-1 p-10 space-y-10">
 
-<section id="dashboard" class="p-8">
+<!-- HEADER -->
 
-<h2 class="text-2xl mb-6 font-semibold">
-Available Courses
+<div class="flex justify-between items-center">
+
+<h2 class="text-2xl font-bold">
+Learning Dashboard
 </h2>
 
-<div id="courseList"
-class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<input id="searchCourse"
+placeholder="Search courses..."
+class="bg-gray-800 p-2 rounded w-60">
+
+</div>
+
+
+
+<!-- DASHBOARD TAB -->
+
+<section id="dashboard" class="tab">
+
+<h3 class="text-xl mb-6">
+Available Courses
+</h3>
+
+<div id="coursesGrid"
+class="grid grid-cols-3 gap-6">
+
 </div>
 
 </section>
@@ -64,14 +111,15 @@ class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
 <!-- MY COURSES -->
 
-<section id="courses" class="p-8 hidden">
+<section id="mycourses" class="tab hidden">
 
-<h2 class="text-2xl mb-6 font-semibold">
+<h3 class="text-xl mb-6">
 My Courses
-</h2>
+</h3>
 
-<div id="myCourses"
-class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div id="myCoursesGrid"
+class="grid grid-cols-3 gap-6">
+
 </div>
 
 </section>
@@ -80,23 +128,16 @@ class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
 <!-- PROFILE -->
 
-<section id="profile" class="p-8 hidden">
+<section id="profile" class="tab hidden">
 
-<h2 class="text-2xl mb-6 font-semibold">
+<h3 class="text-xl mb-6">
 Profile
-</h2>
+</h3>
 
-<div class="bg-gray-800 p-6 rounded w-96 shadow">
+<div class="bg-gray-800 p-6 rounded w-96">
 
-<p class="mb-3">
-<span class="text-gray-400">Name:</span>
-<span id="name"></span>
-</p>
-
-<p>
-<span class="text-gray-400">Email:</span>
-<span id="email"></span>
-</p>
+<p>Name: <span id="userName"></span></p>
+<p>Email: <span id="userEmail"></span></p>
 
 </div>
 
@@ -104,23 +145,29 @@ Profile
 
 
 
-<!-- COURSE CARD TEMPLATE STYLE -->
+<!-- SETTINGS -->
 
-<style>
+<section id="settings" class="tab hidden">
 
-.courseCard{
-background:#1f2937;
-padding:20px;
-border-radius:10px;
-transition:0.3s;
-}
+<h3 class="text-xl mb-6">
+Settings
+</h3>
 
-.courseCard:hover{
-transform:translateY(-4px);
-box-shadow:0 0 10px rgba(0,255,255,0.2);
-}
+<div class="bg-gray-800 p-6 rounded w-96 space-y-3">
 
-</style>
+<button class="bg-cyan-500 px-4 py-2 rounded text-black">
+Change Password
+</button>
+
+<button class="bg-yellow-500 px-4 py-2 rounded text-black">
+Enable 2FA
+</button>
+
+</div>
+
+</section>
+
+</main>
 
 
 
