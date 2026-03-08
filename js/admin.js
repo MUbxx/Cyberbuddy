@@ -3,15 +3,13 @@ import { db } from "./firebase.js";
 import {
 collection,
 addDoc,
-getDocs,
-deleteDoc,
-doc
+getDocs
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-document.getElementById("upload").onclick = async ()=>{
+document.getElementById("upload").onclick=async()=>{
 
-const title = document.getElementById("title").value;
-const video = document.getElementById("video").value;
+const title=document.getElementById("title").value;
+const video=document.getElementById("video").value;
 
 await addDoc(collection(db,"courses"),{
 
@@ -20,36 +18,16 @@ video
 
 });
 
-alert("Course Uploaded");
-
-location.reload();
+alert("Course added");
 
 };
 
-const list = document.getElementById("courseList");
+const list=document.getElementById("list");
 
-const snapshot = await getDocs(collection(db,"courses"));
+const snap=await getDocs(collection(db,"courses"));
 
-snapshot.forEach(c=>{
+snap.forEach(c=>{
 
-list.innerHTML += `
-
-<div>
-
-${c.data().title}
-
-<button onclick="del('${c.id}')">Delete</button>
-
-</div>
-
-`;
+list.innerHTML+=`<p>${c.data().title}</p>`;
 
 });
-
-window.del = async(id)=>{
-
-await deleteDoc(doc(db,"courses",id));
-
-location.reload();
-
-};
