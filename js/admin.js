@@ -27,7 +27,22 @@ const totalEnrollments=document.getElementById("totalEnrollments");
 
 
 
-onAuthStateChanged(auth,async(user)=>{
+function showToast(msg){
+
+const toast=document.getElementById("toast");
+
+toast.innerText=msg;
+toast.classList.remove("hidden");
+
+setTimeout(()=>{
+toast.classList.add("hidden");
+},2500);
+
+}
+
+
+
+onAuthStateChanged(auth, async user=>{
 
 if(!user){
 window.location="login.html";
@@ -69,12 +84,13 @@ courses.push({id:c.id,...c.data()});
 
 coursesList.innerHTML+=`
 
-<div class="flex justify-between bg-gray-800 p-3 rounded">
+<div data-course="${c.id}"
+class="flex justify-between bg-gray-800 p-3 rounded">
 
 <span>${c.data().title}</span>
 
 <button onclick="deleteCourse('${c.id}')"
-class="bg-red-500 text-white px-2 py-1 rounded text-xs">
+class="bg-red-500 px-2 py-1 text-xs rounded">
 
 Delete
 
@@ -85,6 +101,7 @@ Delete
 `;
 
 });
+
 
 usersSnap.forEach(user=>{
 
@@ -97,49 +114,52 @@ enrollments+=owned.length;
 const created=data.createdAt?.toDate().toLocaleDateString() || "N/A";
 
 const row=document.createElement("tr");
-
-row.className="border-b border-gray-800";
+row.setAttribute("data-user",user.id);
 
 row.innerHTML=`
 
-<td class="p-4">${data.name}</td>
+<td class="p-3">${data.name}</td>
 
-<td class="p-4">${data.email}</td>
+<td class="p-3">${data.email}</td>
 
-<td class="p-4">${created}</td>
+<td class="p-3">${created}</td>
 
-<td class="p-4 text-green-400 text-xs">
-${owned.length>0?owned.join(", "):"None"}
+<td class="p-3 text-green-400 text-xs">
+${owned.join(", ") || "None"}
 </td>
 
-<td class="p-4">
+<td class="p-3">
 
-<select id="courseSelect-${user.id}"
-class="bg-gray-900 p-1 text-xs">
+<select id="courseSelect-${user.id}" class="bg-gray-900 text-xs">
 
 <option value="">Course</option>
 
-${courses.map(c=>`
-<option value="${c.id}">${c.title}</option>
-`).join("")}
+${courses.map(c=>`<option value="${c.id}">${c.title}</option>`).join("")}
 
 </select>
 
 </td>
 
-<td class="p-4">
+<td class="p-3">
 
-<button onclick="grantAccess('${user.id}',this)"
-class="bg-cyan-500 text-black px-2 py-1 rounded text-xs">
+<button onclick="grant('${user.id}',this)"
+class="bg-cyan-500 text-black px-2 py-1 text-xs rounded">
 
 Grant
 
 </button>
 
-<button onclick="revokeAccess('${user.id}',this)"
-class="bg-yellow-500 text-black px-2 py-1 rounded text-xs ml-2">
+<button onclick="revoke('${user.id}')"
+class="bg-yellow-500 text-black px-2 py-1 text-xs rounded ml-2">
 
 Revoke
+
+</button>
+
+<button onclick="deleteUser('${user.id}')"
+class="bg-red-500 text-white px-2 py-1 text-xs rounded ml-2">
+
+Delete
 
 </button>
 
@@ -157,40 +177,53 @@ totalEnrollments.innerText=enrollments;
 
 
 
-/* GRANT ACCESS */
+/* GRANT */
 
-window.grantAccess=async(uid,btn)=>{
+window.grant=async(uid,btn)=>{
 
 const select=document.getElementById(`courseSelect-${uid}`);
 const courseId=select.value;
 
 if(!courseId){
-alert("Select course first");
+showToast("Select course first");
+return;
+}
+
+const userRef=doc(db,"users",uid);
+const snap=await getDoc(userRef);
+
+const owned=snap.data().purchasedCourses || [];
+
+if(owned.includes(courseId)){
+showToast("User already has this course");
 return;
 }
 
 btn.disabled=true;
 btn.innerText="Processing";
 
-await updateDoc(doc(db,"users",uid),{
+await updateDoc(userRef,{
 purchasedCourses:arrayUnion(courseId)
 });
 
 btn.innerText="Granted";
+btn.classList.replace("bg-cyan-500","bg-green-500");
+
+showToast("Access granted");
 
 };
 
 
 
-/* REVOKE ACCESS */
+/* REVOKE */
 
-window.revokeAccess=async(uid)=>{
+window.revoke=async(uid)=>{
 
 const select=document.getElementById(`courseSelect-${uid}`);
 const courseId=select.value;
 
 if(!courseId){
-alert("Select course first");
+showToast("Select course first");
 return;
 }
 
@@ -198,34 +231,23 @@ await updateDoc(doc(db,"users",uid),{
 purchasedCourses:arrayRemove(courseId)
 });
 
-alert("Access revoked");
-
-location.reload();
+showToast("Access revoked");
 
 };
 
 
 
-/* UPLOAD COURSE */
+/* DELETE USER */
 
-document.getElementById("uploadBtn").onclick=async()=>{
+window.deleteUser=async(uid)=>{
 
-const title=document.getElementById("title").value;
-const video=document.getElementById("video").value;
+if(!confirm("Delete user?")) return;
 
-if(!title || !video){
-alert("Fill all fields");
-return;
-}
+await deleteDoc(doc(db,"users",uid));
 
-await addDoc(collection(db,"courses"),{
-title,
-video
-});
+document.querySelector(`[data-user='${uid}']`).remove();
 
-alert("Course uploaded");
-
-location.reload();
+showToast("User removed");
 
 };
 
@@ -239,22 +261,47 @@ if(!confirm("Delete course?")) return;
 
 await deleteDoc(doc(db,"courses",id));
 
-location.reload();
+document.querySelector(`[data-course='${id}']`).remove();
+
+showToast("Course deleted");
 
 };
 
 
 
-/* USER SEARCH */
+/* UPLOAD COURSE */
+
+document.getElementById("uploadBtn").onclick=async()=>{
+
+const title=document.getElementById("title").value;
+const video=document.getElementById("video").value;
+
+if(!title || !video){
+showToast("Fill all fields");
+return;
+}
+
+await addDoc(collection(db,"courses"),{
+title,
+video
+});
+
+showToast("Course uploaded");
+
+loadDashboard();
+
+};
+
+
+
+/* SEARCH */
 
 document.getElementById("userSearch").addEventListener("input",function(){
 
 const v=this.value.toLowerCase();
 
 document.querySelectorAll("#usersList tr").forEach(row=>{
-
 row.style.display=row.innerText.toLowerCase().includes(v)?"":"none";
-
 });
 
 });
@@ -266,16 +313,15 @@ row.style.display=row.innerText.toLowerCase().includes(v)?"":"none";
 document.getElementById("logoutBtn").onclick=async()=>{
 
 await signOut(auth);
-
 window.location="login.html";
 
 };
 
 
 
-/* TAB SWITCH */
+/* TABS */
 
-window.showTab=(id)=>{
+window.showTab=id=>{
 
 document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"));
 
