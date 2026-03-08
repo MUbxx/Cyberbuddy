@@ -4,58 +4,45 @@ import {
 collection,
 getDocs,
 doc,
-getDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+getDoc,
+updateDoc
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+signOut,
+sendPasswordResetEmail
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-
-
-/* DOM */
 
 const coursesGrid = document.getElementById("coursesGrid");
 const myCoursesGrid = document.getElementById("myCoursesGrid");
 
-const userName = document.getElementById("userName");
-const userEmail = document.getElementById("userEmail");
-
-const statCourses = document.getElementById("statCourses");
-
-const searchInput = document.getElementById("searchCourse");
+let purchasedCourses=[];
 
 
-
-let allCourses = [];
-let purchasedCourses = [];
-
-
-
-/* AUTH CHECK */
+/* AUTH */
 
 onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
 
-window.location = "login.html";
+window.location="login.html";
 return;
 
 }
 
-const userSnap = await getDoc(doc(db,"users",user.uid));
+const userDoc=await getDoc(doc(db,"users",user.uid));
+const data=userDoc.data();
 
-if(!userSnap.exists()) return;
+document.getElementById("userName").innerText=data.name;
+document.getElementById("userEmail").innerText=data.email;
 
-const data = userSnap.data();
+purchasedCourses=data.purchasedCourses || [];
 
-userName.innerText = data.name || "User";
-userEmail.innerText = data.email || "";
-
-purchasedCourses = data.purchasedCourses || [];
-
-statCourses.innerText = purchasedCourses.length;
+document.getElementById("statCourses").innerText=purchasedCourses.length;
 
 loadCourses();
 
@@ -63,26 +50,52 @@ loadCourses();
 
 
 
-/* LOAD COURSES FROM FIRESTORE */
+/* LOAD COURSES */
 
 async function loadCourses(){
 
 coursesGrid.innerHTML="";
 myCoursesGrid.innerHTML="";
 
-const snapshot = await getDocs(collection(db,"courses"));
+const snap=await getDocs(collection(db,"courses"));
 
-allCourses=[];
+snap.forEach(course=>{
 
-snapshot.forEach(docSnap=>{
+const data=course.data();
+const id=course.id;
 
-const course = docSnap.data();
+const card=document.createElement("div");
 
-const id = docSnap.id;
+card.className="course-card glass p-5 rounded-xl";
 
-allCourses.push({id,...course});
+card.innerHTML=`
 
-renderCourse(id,course);
+<img src="${data.image}"
+class="h-40 w-full object-cover rounded-lg mb-4">
+
+<h3 class="font-bold text-lg">${data.title}</h3>
+
+<p class="text-xs text-slate-400 mt-2">
+${data.description || ""}
+</p>
+
+<button
+onclick="openCourse('${id}')"
+class="mt-4 bg-blue-600 px-4 py-2 rounded-lg text-sm">
+
+Start Learning
+
+</button>
+
+`;
+
+coursesGrid.appendChild(card);
+
+if(purchasedCourses.includes(id)){
+
+myCoursesGrid.appendChild(card.cloneNode(true));
+
+}
 
 });
 
@@ -90,99 +103,25 @@ renderCourse(id,course);
 
 
 
-/* RENDER COURSE CARD */
+/* COURSE PAGE */
 
-function renderCourse(id,course){
+window.openCourse=(id)=>{
 
-const card = document.createElement("div");
+window.location="course.html?id="+id;
 
-card.className = "group bg-[#111827] border border-slate-800 rounded-2xl overflow-hidden transition hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10";
-
-card.innerHTML = `
-
-<img
-src="${course.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475'}"
-class="w-full h-40 object-cover group-hover:scale-105 transition duration-300"
-/>
-
-<div class="p-5 space-y-3">
-
-<div class="flex justify-between items-start">
-
-<h4 class="text-lg font-semibold text-white leading-tight">
-${course.title}
-</h4>
-
-<span class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">
-Course
-</span>
-
-</div>
-
-<p class="text-sm text-slate-400 line-clamp-2">
-${course.description || "Cyber security training"}
-</p>
-
-<div class="space-y-1">
-
-<div class="flex justify-between text-[10px] text-slate-500">
-<span>Progress</span>
-<span>0%</span>
-</div>
-
-<div class="w-full bg-slate-800 rounded-full h-1.5">
-<div class="bg-blue-500 h-1.5 rounded-full" style="width:0%"></div>
-</div>
-
-</div>
-
-<div class="flex items-center justify-between pt-3 border-t border-slate-800">
-
-<div class="flex items-center gap-2 text-xs text-slate-500">
-<i class="fas fa-play-circle"></i>
-<span>Lessons</span>
-</div>
-
-<button onclick="openCourse('${id}')"
-class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition">
-
-Start Learning
-
-</button>
-
-</div>
-
-</div>
-`;
-
-coursesGrid.appendChild(card);
+};
 
 
 
-/* IF USER OWNS COURSE */
+/* SEARCH */
 
-if(purchasedCourses.includes(id)){
+document.getElementById("searchCourse").addEventListener("input",function(){
 
-const myCard = card.cloneNode(true);
-
-myCoursesGrid.appendChild(myCard);
-
-}
-
-}
-
-
-
-/* SEARCH COURSES */
-
-searchInput.addEventListener("input",function(){
-
-const value = this.value.toLowerCase();
+const val=this.value.toLowerCase();
 
 document.querySelectorAll("#coursesGrid > div").forEach(card=>{
 
-card.style.display =
-card.innerText.toLowerCase().includes(value)
+card.style.display=card.innerText.toLowerCase().includes(val)
 ? ""
 : "none";
 
@@ -192,68 +131,128 @@ card.innerText.toLowerCase().includes(value)
 
 
 
-/* OPEN COURSE PLAYER */
+/* PASSWORD RESET */
 
-window.openCourse = (courseId)=>{
+document.getElementById("resetBtn").onclick=async()=>{
 
-window.location = `course.html?id=${courseId}`;
+const user=auth.currentUser;
+
+await sendPasswordResetEmail(auth,user.email);
+
+alert("Reset link sent to "+user.email);
 
 };
+
+
+
+/* PROFILE UPDATE */
+
+document.getElementById("saveProfile").onclick=async()=>{
+
+const name=document.getElementById("editName").value;
+const phone=document.getElementById("editPhone").value;
+
+const user=auth.currentUser;
+
+await updateDoc(doc(db,"users",user.uid),{
+
+name,
+phone
+
+});
+
+alert("Profile updated");
+
+};
+
+
+
+/* CERTIFICATES */
+
+async function loadCertificates(){
+
+const res=await fetch("/data/certificates.json");
+
+const data=await res.json();
+
+const user=auth.currentUser;
+
+const list=document.getElementById("certList");
+
+list.innerHTML="";
+
+data.filter(c=>c.email===user.email)
+.forEach(c=>{
+
+list.innerHTML+=`
+
+<div class="glass p-4 rounded-xl flex justify-between">
+
+<span>${c.course}</span>
+
+<a href="${c.url}" target="_blank"
+class="bg-blue-600 px-4 py-2 rounded-lg">
+
+Download
+
+</a>
+
+</div>
+
+`;
+
+});
+
+}
+
+
+
+/* BILLING */
+
+async function loadInvoices(){
+
+const res=await fetch("/data/bill.json");
+
+const data=await res.json();
+
+const user=auth.currentUser;
+
+const list=document.getElementById("invoiceList");
+
+list.innerHTML="";
+
+data.filter(i=>i.email===user.email)
+.forEach(i=>{
+
+list.innerHTML+=`
+
+<div class="glass p-4 rounded-xl flex justify-between">
+
+<span>${i.course}</span>
+
+<a href="${i.invoice}" target="_blank"
+class="bg-green-600 px-4 py-2 rounded-lg">
+
+Invoice
+
+</a>
+
+</div>
+
+`;
+
+});
+
+}
 
 
 
 /* LOGOUT */
 
-document.getElementById("logoutBtn").onclick = async()=>{
+document.getElementById("logoutBtn").onclick=async()=>{
 
 await signOut(auth);
 
-window.location = "login.html";
-
-};
-
-
-
-/* CERTIFICATE DOWNLOAD */
-
-window.downloadCertificate = async(courseId)=>{
-
-const res = await fetch("/data/certificates.json");
-
-const certs = await res.json();
-
-const cert = certs.find(c=>c.courseId===courseId);
-
-if(!cert){
-
-alert("Certificate not available");
-return;
-
-}
-
-window.open(cert.url);
-
-};
-
-
-
-/* INVOICE DOWNLOAD */
-
-window.downloadInvoice = async(courseId)=>{
-
-const res = await fetch("/data/invoices.json");
-
-const invoices = await res.json();
-
-const invoice = invoices.find(i=>i.courseId===courseId);
-
-if(!invoice){
-
-alert("Invoice not found");
-return;
-
-}
-
-window.open(invoice.url);
+window.location="login.html";
 
 };
