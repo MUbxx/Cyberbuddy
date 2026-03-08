@@ -13,90 +13,96 @@ signOut
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
-/* SWITCH SECTIONS */
+const coursesGrid = document.getElementById("coursesGrid");
+const myCoursesGrid = document.getElementById("myCoursesGrid");
 
-window.showSection = (section)=>{
+const userName = document.getElementById("userName");
+const userEmail = document.getElementById("userEmail");
 
-document.getElementById("dashboard").classList.add("hidden");
-document.getElementById("courses").classList.add("hidden");
-document.getElementById("profile").classList.add("hidden");
+const searchInput = document.getElementById("searchCourse");
 
-document.getElementById(section).classList.remove("hidden");
 
-};
-
+let allCourses = [];
+let purchased = [];
 
 
 /* AUTH CHECK */
 
-onAuthStateChanged(auth, async (user)=>{
+onAuthStateChanged(auth, async(user)=>{
 
 if(!user){
-
 window.location="login.html";
 return;
+}
+
+const userSnap = await getDoc(doc(db,"users",user.uid));
+
+const data = userSnap.data();
+
+userName.innerText = data.name;
+userEmail.innerText = data.email;
+
+purchased = data.purchasedCourses || [];
+
+loadCourses();
+
+});
+
+
+/* LOAD COURSES */
+
+async function loadCourses(){
+
+coursesGrid.innerHTML="";
+myCoursesGrid.innerHTML="";
+
+const snap = await getDocs(collection(db,"courses"));
+
+allCourses = [];
+
+snap.forEach(c=>{
+
+const course = c.data();
+
+allCourses.push({
+id:c.id,
+...course
+});
+
+renderCourse(c.id,course);
+
+});
 
 }
 
-/* LOAD USER */
 
-const userDoc = await getDoc(doc(db,"users",user.uid));
+/* RENDER COURSE CARD */
 
-const userData = userDoc.data();
+function renderCourse(id,course){
 
+const card = document.createElement("div");
 
-/* PROFILE */
+card.className = "card bg-gray-800 rounded overflow-hidden";
 
-document.getElementById("name").innerText = userData.name;
-document.getElementById("email").innerText = userData.email;
+card.innerHTML = `
 
+<img src="${course.thumbnail || 'https://via.placeholder.com/400x200'}"
+class="w-full h-40 object-cover">
 
-/* ALL COURSES */
+<div class="p-4">
 
-const courseSnap = await getDocs(collection(db,"courses"));
+<h4 class="font-bold text-lg mb-1">
+${course.title}
+</h4>
 
-const courseList = document.getElementById("courseList");
-
-courseSnap.forEach(c=>{
-
-courseList.innerHTML += `
-
-<div class="bg-gray-800 p-4 mb-3 rounded">
-
-<h3>${c.data().title}</h3>
-
-<button onclick="openCourse('${c.id}')"
-class="bg-cyan-400 text-black px-3 py-1 rounded">
-
-Open
-
-</button>
-
-</div>
-
-`;
-
-});
-
-
-/* MY COURSES */
-
-const myCourses = document.getElementById("myCourses");
-
-const purchased = userData.purchasedCourses || [];
-
-purchased.forEach(id=>{
-
-myCourses.innerHTML += `
-
-<div class="bg-gray-800 p-4 mb-3 rounded">
-
-Course ID: ${id}
+<p class="text-sm text-gray-400 mb-3">
+${course.description || "Cyber security course"}
+</p>
 
 <button onclick="openCourse('${id}')"
-class="bg-cyan-400 text-black px-3 py-1 rounded">
+class="bg-cyan-500 px-3 py-1 text-black rounded">
 
-Open
+Start Learning
 
 </button>
 
@@ -104,10 +110,38 @@ Open
 
 `;
 
-});
+coursesGrid.appendChild(card);
+
+
+/* IF USER OWNS COURSE */
+
+if(purchased.includes(id)){
+
+const myCard = card.cloneNode(true);
+
+myCoursesGrid.appendChild(myCard);
+
+}
+
+}
+
+
+/* COURSE SEARCH */
+
+searchInput.addEventListener("input",function(){
+
+const value = this.value.toLowerCase();
+
+document.querySelectorAll("#coursesGrid .card").forEach(card=>{
+
+card.style.display =
+card.innerText.toLowerCase().includes(value)
+? ""
+: "none";
 
 });
 
+});
 
 
 /* OPEN COURSE */
@@ -119,10 +153,22 @@ window.location = "course.html?id="+id;
 };
 
 
+/* TAB SWITCH */
+
+window.showTab = (tab)=>{
+
+document.querySelectorAll(".tab").forEach(t=>{
+t.classList.add("hidden");
+});
+
+document.getElementById(tab).classList.remove("hidden");
+
+};
+
 
 /* LOGOUT */
 
-document.getElementById("logoutBtn").onclick = async ()=>{
+document.getElementById("logoutBtn").onclick = async()=>{
 
 await signOut(auth);
 
