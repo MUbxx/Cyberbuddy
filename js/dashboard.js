@@ -5,25 +5,19 @@ collection,
 getDocs
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const coursesDiv = document.getElementById("courses");
+const coursesDiv=document.getElementById("courses");
 
-async function loadCourses(){
+const snap=await getDocs(collection(db,"courses"));
 
-const snapshot = await getDocs(collection(db,"courses"));
+snap.forEach(c=>{
 
-snapshot.forEach(docu=>{
+coursesDiv.innerHTML+=`
 
-const course = docu.data();
+<div class="mb-3">
 
-coursesDiv.innerHTML += `
+<h3>${c.data().title}</h3>
 
-<div>
-
-<h3>${course.title}</h3>
-
-<button onclick="goCourse('${docu.id}')">
-Open
-</button>
+<button onclick="openCourse('${c.id}')">Open</button>
 
 </div>
 
@@ -31,12 +25,8 @@ Open
 
 });
 
-}
+window.openCourse=(id)=>{
 
-window.goCourse = (id)=>{
+window.location=`course.html?id=${id}`;
 
-window.location.href=`course-player.html?id=${id}`;
-
-}
-
-loadCourses();
+};
