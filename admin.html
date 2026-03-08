@@ -15,9 +15,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
 
 <style>
 
-body{
-background:#0f172a;
-}
+body{background:#0f172a;}
 
 .glass{
 background:rgba(30,41,59,0.7);
@@ -46,6 +44,22 @@ Admin Terminal
 
 </div>
 
+<nav class="flex-1 px-4 space-y-2">
+
+<a onclick="showTab('dashboard')" class="cursor-pointer block p-3 hover:bg-gray-800 rounded">
+Dashboard
+</a>
+
+<a onclick="showTab('users')" class="cursor-pointer block p-3 hover:bg-gray-800 rounded">
+Users
+</a>
+
+<a onclick="showTab('courses')" class="cursor-pointer block p-3 hover:bg-gray-800 rounded">
+Courses
+</a>
+
+</nav>
+
 <div class="p-4 border-t border-gray-800">
 
 <button id="logoutBtn"
@@ -60,72 +74,56 @@ Logout
 </aside>
 
 
+<main class="flex-1 overflow-y-auto p-8 space-y-8">
 
-<!-- MAIN -->
+<!-- DASHBOARD -->
 
-<main class="flex-1 overflow-y-auto">
+<section id="dashboard" class="tab">
 
-<header class="p-6 border-b border-gray-800">
-
-<h2 class="text-xl font-semibold">
-Admin Command Center
+<h2 class="text-xl mb-4 font-bold">
+Dashboard
 </h2>
 
-</header>
+<div class="grid grid-cols-3 gap-6">
 
-
-
-<div class="p-8 space-y-8">
-
-<!-- STATS -->
-
-<div class="grid grid-cols-2 gap-6">
-
-<div class="glass p-6 rounded-xl border border-gray-800">
-
-<p class="text-gray-400 text-sm">
-Total Users
-</p>
-
-<h3 id="totalUsers" class="text-3xl font-bold">
-0
-</h3>
-
+<div class="glass p-6 rounded-xl">
+<p>Total Users</p>
+<h3 id="totalUsers" class="text-3xl font-bold">0</h3>
 </div>
 
-<div class="glass p-6 rounded-xl border border-gray-800">
+<div class="glass p-6 rounded-xl">
+<p>Total Courses</p>
+<h3 id="totalCourses" class="text-3xl font-bold">0</h3>
+</div>
 
-<p class="text-gray-400 text-sm">
-Total Courses
-</p>
-
-<h3 id="totalCourses" class="text-3xl font-bold">
-0
-</h3>
-
+<div class="glass p-6 rounded-xl">
+<p>Total Enrollments</p>
+<h3 id="totalEnrollments" class="text-3xl font-bold">0</h3>
 </div>
 
 </div>
 
+</section>
 
 
-<!-- USERS TABLE -->
 
-<section class="glass rounded-xl border border-gray-800 overflow-hidden">
+<!-- USERS -->
 
-<div class="p-4 border-b border-gray-700">
+<section id="users" class="tab hidden">
 
-<h3 class="font-bold">
+<h2 class="text-xl mb-4 font-bold">
 Users
-</h3>
+</h2>
 
-</div>
+<input id="userSearch"
+placeholder="Search user"
+class="bg-gray-800 p-2 rounded mb-4">
 
 <div class="overflow-x-auto">
 
-<table class="w-full text-left text-sm">
+<table class="w-full text-sm">
 
-<thead class="text-gray-400 text-xs border-b border-gray-800">
+<thead class="text-gray-400 border-b border-gray-800">
 
 <tr>
 
@@ -133,7 +131,11 @@ Users
 
 <th class="p-4">Email</th>
 
-<th class="p-4">Grant Course</th>
+<th class="p-4">Created</th>
+
+<th class="p-4">Courses</th>
+
+<th class="p-4">Grant</th>
 
 <th class="p-4">Action</th>
 
@@ -151,50 +153,36 @@ Users
 
 
 
-<!-- COURSE UPLOAD -->
+<!-- COURSES -->
 
-<section class="glass p-6 rounded-xl border border-gray-800">
+<section id="courses" class="tab hidden">
 
-<h3 class="font-bold mb-4">
-Upload Course
-</h3>
+<h2 class="text-xl mb-4 font-bold">
+Courses
+</h2>
+
+<div class="space-y-3 mb-6">
 
 <input id="title"
 placeholder="Course Title"
-class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg mb-3">
+class="bg-gray-800 p-3 rounded w-full">
 
 <input id="video"
 placeholder="Video URL"
-class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg mb-3">
+class="bg-gray-800 p-3 rounded w-full">
 
 <button id="uploadBtn"
-class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-lg">
+class="bg-cyan-500 text-black px-4 py-2 rounded">
 
 Upload Course
 
 </button>
 
-</section>
-
-
-
-<!-- COURSES LIST -->
-
-<section class="glass rounded-xl border border-gray-800">
-
-<div class="p-4 border-b border-gray-700">
-
-<h3 class="font-bold">
-Courses
-</h3>
-
 </div>
 
-<div id="coursesList" class="p-4 space-y-3"></div>
+<div id="coursesList" class="space-y-2"></div>
 
 </section>
-
-</div>
 
 </main>
 
