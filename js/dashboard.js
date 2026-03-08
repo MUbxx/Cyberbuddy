@@ -5,61 +5,58 @@ collection,
 getDocs,
 doc,
 getDoc
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
-const grid = document.getElementById("coursesGrid");
+const grid=document.getElementById("coursesGrid");
 
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
 
-window.location="login.html";
+location="login.html";
 return;
 
 }
 
-const userRef = doc(db,"users",user.uid);
-const userSnap = await getDoc(userRef);
-const userData = userSnap.data();
+const userSnap=await getDoc(doc(db,"users",user.uid));
+const userData=userSnap.data();
 
 loadCourses(userData);
 
 });
 
 
-
 async function loadCourses(userData){
 
-const coursesSnap = await getDocs(collection(db,"courses"));
+const courses=await getDocs(collection(db,"courses"));
 
 grid.innerHTML="";
 
-coursesSnap.forEach(course=>{
+courses.forEach(course=>{
 
-const data = course.data();
+const data=course.data();
 
-const hasAccess = userData.purchasedCourses?.includes(course.id);
+const access=userData.purchasedCourses?.includes(course.id);
 
-grid.innerHTML += `
+grid.innerHTML+=`
 
-<div class="bg-gray-800 rounded-lg p-4">
+<div class="bg-gray-800 p-4 rounded-lg">
 
 <img src="${data.image}" class="rounded mb-3">
 
-<h3 class="font-bold text-lg">${data.title}</h3>
+<h3 class="font-bold">${data.title}</h3>
 
 <p class="text-gray-400 text-sm mb-3">${data.description}</p>
 
 ${
-hasAccess
+access
 ?
 `<a href="course-player.html?id=${course.id}" class="bg-cyan-400 text-black px-4 py-2 rounded">Start Learning</a>`
 :
@@ -73,3 +70,12 @@ hasAccess
 });
 
 }
+
+
+document.getElementById("logoutBtn").onclick=()=>{
+
+signOut(auth);
+
+location="login.html";
+
+};
