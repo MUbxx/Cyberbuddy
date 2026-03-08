@@ -6,23 +6,26 @@ getDocs,
 doc,
 getDoc,
 updateDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
 signOut,
 sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-const coursesGrid = document.getElementById("coursesGrid");
-const myCoursesGrid = document.getElementById("myCoursesGrid");
 
-let purchasedCourses = [];
+const coursesGrid=document.getElementById("coursesGrid");
+const myCoursesGrid=document.getElementById("myCoursesGrid");
+
+let purchasedCourses=[];
 
 
 /* AUTH */
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
 
@@ -31,55 +34,52 @@ return;
 
 }
 
-const userDoc = await getDoc(doc(db,"users",user.uid));
-const data = userDoc.data();
+const userDoc=await getDoc(doc(db,"users",user.uid));
+const data=userDoc.data();
 
-document.getElementById("userName").innerText = data.name || "User";
-document.getElementById("userEmail").innerText = data.email || "";
+document.getElementById("userName").innerText=data.name||"User";
+document.getElementById("userEmail").innerText=data.email||"";
 
-document.getElementById("editName").value = data.name || "";
-document.getElementById("editPhone").value = data.phone || "";
+document.getElementById("editName").value=data.name||"";
+document.getElementById("editPhone").value=data.phone||"";
 
-purchasedCourses = data.purchasedCourses || [];
-
-document.getElementById("statCourses").innerText = purchasedCourses.length;
+purchasedCourses=data.purchasedCourses||[];
 
 loadCourses();
 
 });
 
 
-/* LOAD COURSES */
+/* COURSES */
 
 async function loadCourses(){
 
 coursesGrid.innerHTML="";
 myCoursesGrid.innerHTML="";
 
-const snap = await getDocs(collection(db,"courses"));
+const snap=await getDocs(collection(db,"courses"));
 
 snap.forEach(course=>{
 
-const data = course.data();
-const id = course.id;
+const data=course.data();
+const id=course.id;
 
-const card = document.createElement("div");
+const card=document.createElement("div");
 
-card.className="course-card glass p-5 rounded-xl";
+card.className="glass p-5 rounded-xl";
 
 card.innerHTML=`
 
 <img src="${data.image}"
 class="h-40 w-full object-cover rounded-lg mb-4">
 
-<h3 class="font-bold text-lg">${data.title}</h3>
+<h3 class="font-bold">${data.title}</h3>
 
 <p class="text-xs text-slate-400 mt-2">
-${data.description || ""}
+${data.description||""}
 </p>
 
-<button
-onclick="openCourse('${id}')"
+<button onclick="openCourse('${id}')"
 class="mt-4 bg-blue-600 px-4 py-2 rounded-lg text-sm">
 
 Start Learning
@@ -91,10 +91,10 @@ Start Learning
 coursesGrid.appendChild(card);
 
 if(purchasedCourses.includes(id)){
-myCoursesGrid.appendChild(card.cloneNode(true));
+myCoursesGrid.appendChild(card.cloneNode(true))
 }
 
-});
+})
 
 }
 
@@ -102,82 +102,79 @@ myCoursesGrid.appendChild(card.cloneNode(true));
 /* COURSE PAGE */
 
 window.openCourse=(id)=>{
-
-window.location="course.html?id="+id;
-
-};
+window.location="course.html?id="+id
+}
 
 
 /* SEARCH */
 
 document.getElementById("searchCourse").addEventListener("input",function(){
 
-const val=this.value.toLowerCase();
+const val=this.value.toLowerCase()
 
 document.querySelectorAll("#coursesGrid > div").forEach(card=>{
 
-card.style.display =
+card.style.display=
 card.innerText.toLowerCase().includes(val)
-? ""
-: "none";
+?"":"none"
 
-});
+})
 
-});
+})
 
 
 /* PROFILE UPDATE */
 
-document.getElementById("saveProfile").onclick = async ()=>{
+document.getElementById("saveProfile").onclick=async()=>{
 
-const name = document.getElementById("editName").value;
-const phone = document.getElementById("editPhone").value;
+const name=document.getElementById("editName").value
+const phone=document.getElementById("editPhone").value
 
-const user = auth.currentUser;
+const user=auth.currentUser
 
 await updateDoc(doc(db,"users",user.uid),{
-name:name,
-phone:phone
-});
+name,
+phone
+})
 
-document.getElementById("userName").innerText=name;
+alert("Profile Updated")
 
-alert("Profile updated");
-
-};
+}
 
 
 /* PASSWORD RESET */
 
-document.getElementById("resetBtn").onclick = async ()=>{
+document.getElementById("resetBtn").onclick=async()=>{
 
-const user = auth.currentUser;
+const user=auth.currentUser
 
-await sendPasswordResetEmail(auth,user.email);
+await sendPasswordResetEmail(auth,user.email)
 
-alert("Reset link sent to "+user.email);
+alert("Reset link sent")
 
-};
+}
 
 
 /* CERTIFICATES */
 
-async function loadCertificates(){
+window.loadCertificates=async()=>{
 
-const res = await fetch(
+try{
+
+const user=auth.currentUser
+
+const res=await fetch(
 "https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
-);
+)
 
-const data = await res.json();
+const data=await res.json()
 
-const user = auth.currentUser;
+const list=document.getElementById("certList")
 
-const list = document.getElementById("certList");
-
-list.innerHTML="";
+list.innerHTML=""
 
 data.certificates
-.filter(c => c.email === user.email)
+.filter(c=>c.email===user.email)
 .forEach(cert=>{
 
 list.innerHTML+=`
@@ -185,12 +182,15 @@ list.innerHTML+=`
 <div class="glass p-4 rounded-xl flex justify-between">
 
 <div>
+
 <h4 class="font-bold">${cert.course}</h4>
+
 <p class="text-xs text-slate-400">${cert.type}</p>
+
 </div>
 
 <a href="certificate.html?id=${cert.certId}"
-class="bg-blue-600 px-4 py-2 rounded-lg text-xs font-bold">
+class="bg-blue-600 px-4 py-2 rounded-lg text-xs">
 
 View
 
@@ -198,31 +198,39 @@ View
 
 </div>
 
-`;
+`
 
-});
+})
+
+}catch(err){
+
+console.error("Certificate Error",err)
+
+}
 
 }
 
 
 /* BILLING */
 
-async function loadInvoices(){
+window.loadInvoices=async()=>{
 
-const res = await fetch(
+try{
+
+const user=auth.currentUser
+
+const res=await fetch(
 "https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
-);
+)
 
-const bills = await res.json();
+const bills=await res.json()
 
-const user = auth.currentUser;
+const list=document.getElementById("invoiceList")
 
-const list = document.getElementById("invoiceList");
-
-list.innerHTML="";
+list.innerHTML=""
 
 bills
-.filter(b => b.email === user.email)
+.filter(b=>b.email===user.email)
 .forEach(bill=>{
 
 list.innerHTML+=`
@@ -230,15 +238,20 @@ list.innerHTML+=`
 <div class="glass p-4 rounded-xl flex justify-between">
 
 <div>
+
 <h4 class="font-bold">${bill.course}</h4>
+
 <p class="text-xs text-slate-400">
+
 ₹${bill.amount} • ${bill.date}
+
 </p>
+
 </div>
 
 <a href="${bill.verifyUrl}"
 target="_blank"
-class="bg-green-600 px-4 py-2 rounded-lg text-xs font-bold">
+class="bg-green-600 px-4 py-2 rounded-lg text-xs">
 
 Verify
 
@@ -246,41 +259,37 @@ Verify
 
 </div>
 
-`;
+`
 
-});
+})
+
+}catch(err){
+
+console.error("Billing Error",err)
+
+}
 
 }
 
 
 /* SIDEBAR TOGGLE */
 
-const sidebar = document.getElementById("sidebar");
-const toggle = document.getElementById("toggleSidebar");
+const sidebar=document.getElementById("sidebar")
+const toggle=document.getElementById("toggleSidebar")
 
 toggle.onclick=()=>{
 
-if(sidebar.classList.contains("w-72")){
-
-sidebar.classList.remove("w-72");
-sidebar.classList.add("w-16");
-
-}else{
-
-sidebar.classList.remove("w-16");
-sidebar.classList.add("w-72");
+sidebar.classList.toggle("-ml-72")
 
 }
-
-};
 
 
 /* LOGOUT */
 
 document.getElementById("logoutBtn").onclick=async()=>{
 
-await signOut(auth);
+await signOut(auth)
 
-window.location="login.html";
+window.location="login.html"
 
-};
+}
