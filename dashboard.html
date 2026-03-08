@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cyber Buddy | Student Console</title>
+<title>Cyber Buddy | Student Dashboard</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -42,16 +42,17 @@ background:#2563eb;
 color:white;
 }
 
-.course-card{
-transition:.3s;
-}
-
 .course-card:hover{
 transform:translateY(-5px);
 box-shadow:0 15px 25px rgba(0,0,0,.6);
 }
 
+#sidebar{
+transition:all .3s ease;
+}
+
 </style>
+
 </head>
 
 <body class="flex h-screen">
@@ -59,9 +60,9 @@ box-shadow:0 15px 25px rgba(0,0,0,.6);
 <!-- SIDEBAR -->
 
 <aside id="sidebar"
-class="w-72 transition-all duration-300 bg-[#060a13] border-r border-slate-800 flex flex-col p-6">
+class="w-72 bg-[#060a13] border-r border-slate-800 flex flex-col p-6">
 
-<div class="flex items-center justify-between mb-10">
+<div class="flex items-center justify-between mb-8">
 
 <div class="flex items-center gap-3">
 
@@ -80,6 +81,7 @@ Cyber<span class="text-blue-500">Buddy</span>
 </button>
 
 </div>
+
 
 <nav class="flex-1 space-y-2">
 
@@ -155,32 +157,11 @@ class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-sm">
 
 <div class="flex-1 overflow-y-auto p-10 space-y-10">
 
-
 <!-- DASHBOARD -->
 
 <section id="dashboard">
 
-<div class="grid md:grid-cols-3 gap-6">
-
-<div class="glass p-6 rounded-xl">
-<p class="text-xs text-slate-400">Courses</p>
-<h3 id="statCourses" class="text-3xl font-bold">0</h3>
-</div>
-
-<div class="glass p-6 rounded-xl">
-<p class="text-xs text-slate-400">Certificates</p>
-<h3 id="statCerts" class="text-3xl font-bold">0</h3>
-</div>
-
-<div class="glass p-6 rounded-xl">
-<p class="text-xs text-slate-400">Learning Hours</p>
-<h3 class="text-3xl font-bold">24</h3>
-</div>
-
-</div>
-
-
-<h3 class="text-xl font-bold mt-10">Available Courses</h3>
+<h3 class="text-xl font-bold">Available Courses</h3>
 
 <div id="coursesGrid"
 class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-6"></div>
@@ -215,7 +196,7 @@ class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-6"></div>
 
 <section id="billing" class="hidden">
 
-<h3 class="text-xl font-bold">Invoices</h3>
+<h3 class="text-xl font-bold">Billing</h3>
 
 <div id="invoiceList" class="space-y-4 mt-6"></div>
 
@@ -282,6 +263,9 @@ document.getElementById(id).classList.remove("hidden")
 
 document.querySelectorAll(".sidebar-item").forEach(b=>b.classList.remove("active"))
 btn.classList.add("active")
+
+if(id==="certificates") loadCertificates()
+if(id==="billing") loadInvoices()
 
 }
 
