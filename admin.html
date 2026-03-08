@@ -10,16 +10,19 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 <style>
 
-body{background:#0f172a;}
+body{
+background:#0f172a;
+}
 
 .glass{
 background:rgba(30,41,59,0.7);
-backdrop-filter:blur(10px);
+backdrop-filter:blur(8px);
+}
+
+.tab{
+transition:opacity .3s ease;
 }
 
 </style>
@@ -38,23 +41,23 @@ backdrop-filter:blur(10px);
 CYBER<span class="text-white">BUDDY</span>
 </h1>
 
-<p class="text-xs text-gray-500 uppercase">
-Admin Terminal
+<p class="text-xs text-gray-400">
+Admin Control
 </p>
 
 </div>
 
 <nav class="flex-1 px-4 space-y-2">
 
-<a onclick="showTab('dashboard')" class="cursor-pointer block p-3 hover:bg-gray-800 rounded">
+<a onclick="showTab('dashboard')" class="block p-3 hover:bg-gray-800 rounded cursor-pointer">
 Dashboard
 </a>
 
-<a onclick="showTab('users')" class="cursor-pointer block p-3 hover:bg-gray-800 rounded">
+<a onclick="showTab('users')" class="block p-3 hover:bg-gray-800 rounded cursor-pointer">
 Users
 </a>
 
-<a onclick="showTab('courses')" class="cursor-pointer block p-3 hover:bg-gray-800 rounded">
+<a onclick="showTab('courses')" class="block p-3 hover:bg-gray-800 rounded cursor-pointer">
 Courses
 </a>
 
@@ -63,7 +66,7 @@ Courses
 <div class="p-4 border-t border-gray-800">
 
 <button id="logoutBtn"
-class="w-full bg-red-500 text-white p-2 rounded-lg">
+class="w-full bg-red-500 text-white p-2 rounded">
 
 Logout
 
@@ -74,29 +77,28 @@ Logout
 </aside>
 
 
-<main class="flex-1 overflow-y-auto p-8 space-y-8">
+
+<main class="flex-1 p-8 space-y-10 overflow-y-auto">
 
 <!-- DASHBOARD -->
 
 <section id="dashboard" class="tab">
 
-<h2 class="text-xl mb-4 font-bold">
-Dashboard
-</h2>
+<h2 class="text-xl font-bold mb-4">Dashboard</h2>
 
 <div class="grid grid-cols-3 gap-6">
 
-<div class="glass p-6 rounded-xl">
+<div class="glass p-6 rounded">
 <p>Total Users</p>
 <h3 id="totalUsers" class="text-3xl font-bold">0</h3>
 </div>
 
-<div class="glass p-6 rounded-xl">
+<div class="glass p-6 rounded">
 <p>Total Courses</p>
 <h3 id="totalCourses" class="text-3xl font-bold">0</h3>
 </div>
 
-<div class="glass p-6 rounded-xl">
+<div class="glass p-6 rounded">
 <p>Total Enrollments</p>
 <h3 id="totalEnrollments" class="text-3xl font-bold">0</h3>
 </div>
@@ -106,38 +108,30 @@ Dashboard
 </section>
 
 
-
 <!-- USERS -->
 
 <section id="users" class="tab hidden">
 
-<h2 class="text-xl mb-4 font-bold">
-Users
-</h2>
+<h2 class="text-xl font-bold mb-4">Users</h2>
 
 <input id="userSearch"
-placeholder="Search user"
-class="bg-gray-800 p-2 rounded mb-4">
+placeholder="Search users..."
+class="bg-gray-800 p-2 rounded mb-4 w-72">
 
 <div class="overflow-x-auto">
 
 <table class="w-full text-sm">
 
-<thead class="text-gray-400 border-b border-gray-800">
+<thead class="border-b border-gray-700">
 
 <tr>
 
-<th class="p-4">Name</th>
-
-<th class="p-4">Email</th>
-
-<th class="p-4">Created</th>
-
-<th class="p-4">Courses</th>
-
-<th class="p-4">Grant</th>
-
-<th class="p-4">Action</th>
+<th class="p-3">Name</th>
+<th class="p-3">Email</th>
+<th class="p-3">Created</th>
+<th class="p-3">Courses</th>
+<th class="p-3">Grant</th>
+<th class="p-3">Actions</th>
 
 </tr>
 
@@ -152,27 +146,24 @@ class="bg-gray-800 p-2 rounded mb-4">
 </section>
 
 
-
 <!-- COURSES -->
 
 <section id="courses" class="tab hidden">
 
-<h2 class="text-xl mb-4 font-bold">
-Courses
-</h2>
+<h2 class="text-xl font-bold mb-4">Courses</h2>
 
 <div class="space-y-3 mb-6">
 
 <input id="title"
 placeholder="Course Title"
-class="bg-gray-800 p-3 rounded w-full">
+class="bg-gray-800 p-2 rounded w-full">
 
 <input id="video"
 placeholder="Video URL"
-class="bg-gray-800 p-3 rounded w-full">
+class="bg-gray-800 p-2 rounded w-full">
 
 <button id="uploadBtn"
-class="bg-cyan-500 text-black px-4 py-2 rounded">
+class="bg-cyan-500 px-4 py-2 text-black rounded">
 
 Upload Course
 
@@ -185,6 +176,12 @@ Upload Course
 </section>
 
 </main>
+
+<!-- Toast Notification -->
+
+<div id="toast"
+class="fixed bottom-5 right-5 bg-cyan-500 text-black px-4 py-2 rounded hidden">
+</div>
 
 <script type="module" src="js/admin.js"></script>
 
