@@ -1,6 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Cyber Buddy Academy</title>
 
@@ -12,190 +15,116 @@
 
 <!-- NAVBAR -->
 
-<header class="flex justify-between p-4 border-b border-gray-700">
+<header class="flex justify-between items-center p-4 border-b border-gray-700 bg-gray-950">
 
-<h1 class="text-cyan-400 font-bold text-xl">
+<h1 class="text-cyan-400 text-xl font-bold">
 Cyber Buddy Academy
 </h1>
 
-<div class="flex gap-6">
+<nav class="flex gap-6 items-center">
 
-<button onclick="showSection('dashboard')">Dashboard</button>
+<button onclick="showSection('dashboard')" class="hover:text-cyan-400">
+Dashboard
+</button>
 
-<button onclick="showSection('courses')">My Courses</button>
+<button onclick="showSection('courses')" class="hover:text-cyan-400">
+My Courses
+</button>
 
-<button onclick="showSection('profile')">Profile</button>
+<button onclick="showSection('profile')" class="hover:text-cyan-400">
+Profile
+</button>
 
-<button id="logoutBtn" class="bg-red-500 px-3 py-1 rounded">
+<button id="logoutBtn"
+class="bg-red-500 px-3 py-1 rounded hover:bg-red-600">
 Logout
 </button>
 
-</div>
+</nav>
 
 </header>
 
 
-<!-- DASHBOARD -->
 
-<div id="dashboard" class="p-8">
+<!-- DASHBOARD SECTION -->
 
-<h2 class="text-2xl mb-6">Available Courses</h2>
+<section id="dashboard" class="p-8">
 
-<div id="courseList"></div>
+<h2 class="text-2xl mb-6 font-semibold">
+Available Courses
+</h2>
 
+<div id="courseList"
+class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 </div>
+
+</section>
+
 
 
 <!-- MY COURSES -->
 
-<div id="courses" class="p-8 hidden">
+<section id="courses" class="p-8 hidden">
 
-<h2 class="text-2xl mb-6">My Courses</h2>
+<h2 class="text-2xl mb-6 font-semibold">
+My Courses
+</h2>
 
-<div id="myCourses"></div>
-
+<div id="myCourses"
+class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 </div>
+
+</section>
+
 
 
 <!-- PROFILE -->
 
-<div id="profile" class="p-8 hidden">
+<section id="profile" class="p-8 hidden">
 
-<h2 class="text-2xl mb-6">Profile</h2>
+<h2 class="text-2xl mb-6 font-semibold">
+Profile
+</h2>
 
-<div class="bg-gray-800 p-6 rounded w-96">
+<div class="bg-gray-800 p-6 rounded w-96 shadow">
 
-<p><b>Name:</b> <span id="name"></span></p>
+<p class="mb-3">
+<span class="text-gray-400">Name:</span>
+<span id="name"></span>
+</p>
 
-<p><b>Email:</b> <span id="email"></span></p>
+<p>
+<span class="text-gray-400">Email:</span>
+<span id="email"></span>
+</p>
 
 </div>
 
-</div>
+</section>
 
 
-<script type="module">
 
-import { auth, db } from "./js/firebase.js";
+<!-- COURSE CARD TEMPLATE STYLE -->
 
-import {
-collection,
-getDocs,
-doc,
-getDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<style>
 
-import {
-onAuthStateChanged,
-signOut
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-window.showSection = (section)=>{
-
-document.getElementById("dashboard").classList.add("hidden");
-document.getElementById("courses").classList.add("hidden");
-document.getElementById("profile").classList.add("hidden");
-
-document.getElementById(section).classList.remove("hidden");
-
-};
-
-
-onAuthStateChanged(auth, async (user)=>{
-
-if(!user){
-
-window.location="login.html";
-return;
-
+.courseCard{
+background:#1f2937;
+padding:20px;
+border-radius:10px;
+transition:0.3s;
 }
 
+.courseCard:hover{
+transform:translateY(-4px);
+box-shadow:0 0 10px rgba(0,255,255,0.2);
+}
 
-/* PROFILE */
-
-const userDoc = await getDoc(doc(db,"users",user.uid));
-
-const userData = userDoc.data();
-
-document.getElementById("name").innerText = userData.name;
-
-document.getElementById("email").innerText = userData.email;
+</style>
 
 
-/* ALL COURSES */
 
-const courseSnap = await getDocs(collection(db,"courses"));
-
-const list = document.getElementById("courseList");
-
-courseSnap.forEach(c=>{
-
-list.innerHTML += `
-
-<div class="bg-gray-800 p-4 mb-3 rounded">
-
-<h3>${c.data().title}</h3>
-
-<button onclick="openCourse('${c.id}')"
-class="bg-cyan-400 text-black px-3 py-1 rounded">
-
-Open
-
-</button>
-
-</div>
-
-`;
-
-});
-
-
-/* MY COURSES */
-
-const myCourses = document.getElementById("myCourses");
-
-const purchased = userData.purchasedCourses || [];
-
-purchased.forEach(id=>{
-
-myCourses.innerHTML += `
-
-<div class="bg-gray-800 p-4 mb-3 rounded">
-
-Course ID: ${id}
-
-<button onclick="openCourse('${id}')"
-class="bg-cyan-400 text-black px-3 py-1 rounded">
-
-Open
-
-</button>
-
-</div>
-
-`;
-
-});
-
-});
-
-
-window.openCourse = (id)=>{
-
-window.location = "course.html?id="+id;
-
-};
-
-
-document.getElementById("logoutBtn").onclick = async ()=>{
-
-await signOut(auth);
-
-window.location="login.html";
-
-};
-
-</script>
+<script type="module" src="js/dashboard.js"></script>
 
 </body>
 </html>
