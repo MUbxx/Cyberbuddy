@@ -5,29 +5,37 @@ signInWithEmailAndPassword,
 GoogleAuthProvider,
 signInWithPopup,
 sendPasswordResetEmail
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 import {
 doc,
 getDoc,
 setDoc
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 
-/* EMAIL LOGIN */
+const loginBtn=document.getElementById("loginBtn");
+const googleBtn=document.getElementById("googleLoginBtn");
+const forgotBtn=document.getElementById("forgotBtn");
 
-document.getElementById("loginBtn").onclick = async () => {
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+loginBtn.onclick=async()=>{
+
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
 
 try{
 
-const result = await signInWithEmailAndPassword(auth,email,password);
+const res=await signInWithEmailAndPassword(auth,email,password);
 
-await redirectUser(result.user);
+if(!res.user.emailVerified){
+
+alert("Verify your email first");
+return;
+
+}
+
+redirectUser(res.user);
 
 }catch(err){
 
@@ -38,94 +46,60 @@ alert(err.message);
 };
 
 
-/* GOOGLE LOGIN */
+googleBtn.onclick=async()=>{
 
-document.getElementById("googleBtn").onclick = async () => {
+const provider=new GoogleAuthProvider();
 
-const provider = new GoogleAuthProvider();
+const result=await signInWithPopup(auth,provider);
 
-try{
+const user=result.user;
 
-const result = await signInWithPopup(auth,provider);
+const ref=doc(db,"users",user.uid);
 
-const user = result.user;
-
-const ref = doc(db,"users",user.uid);
-const snap = await getDoc(ref);
+const snap=await getDoc(ref);
 
 if(!snap.exists()){
-
-let role="user";
-
-if(user.email==="admin@cyberbuddy.com"){
-role="admin";
-}
 
 await setDoc(ref,{
 name:user.displayName,
 email:user.email,
-role:role,
-purchasedCourses:[],
-createdAt:new Date()
+role:"user",
+purchasedCourses:[]
 });
 
 }
 
-await redirectUser(user);
-
-}catch(err){
-
-alert(err.message);
-
-}
+redirectUser(user);
 
 };
 
 
-/* PASSWORD RESET */
-
-document.getElementById("forgotBtn").onclick = async () => {
+forgotBtn.onclick=async()=>{
 
 const email=document.getElementById("email").value;
 
-if(!email){
-alert("Enter your email first");
-return;
-}
-
-try{
-
 await sendPasswordResetEmail(auth,email);
 
-alert("Password reset email sent");
-
-}catch(err){
-
-alert(err.message);
-
-}
+alert("Reset email sent");
 
 };
 
 
-
-/* REDIRECT LOGIC */
-
 async function redirectUser(user){
 
-const ref = doc(db,"users",user.uid);
+const ref=doc(db,"users",user.uid);
 
-const snap = await getDoc(ref);
+const snap=await getDoc(ref);
 
-const data = snap.data();
+const data=snap.data();
 
-if(data.role === "admin"){
+if(data.role==="admin"){
 
-window.location="admin.html";
+location="admin.html";
 
 }else{
 
-window.location="dashboard.html";
+location="dashboard.html";
 
 }
 
