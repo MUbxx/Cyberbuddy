@@ -104,23 +104,6 @@ window.location="course.html?id="+id
 }
 
 
-/* SEARCH */
-
-document.getElementById("searchCourse").addEventListener("input",function(){
-
-const val=this.value.toLowerCase()
-
-document.querySelectorAll("#coursesGrid > div").forEach(card=>{
-
-card.style.display=
-card.innerText.toLowerCase().includes(val)
-?"":"none"
-
-})
-
-})
-
-
 /* PROFILE */
 
 document.getElementById("saveProfile").onclick=async()=>{
@@ -140,7 +123,7 @@ alert("Profile updated")
 }
 
 
-/* RESET PASSWORD */
+/* PASSWORD RESET */
 
 document.getElementById("resetBtn").onclick=async()=>{
 
@@ -155,23 +138,34 @@ alert("Reset link sent")
 
 /* CERTIFICATES */
 
-window.loadCertificates=async()=>{
+window.loadCertificates = async () => {
 
-const res=await fetch(
+const list = document.getElementById("certList")
+list.innerHTML="Loading..."
+
+try{
+
+const res = await fetch(
 "https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
 )
 
-const data=await res.json()
+const data = await res.json()
 
-const user=auth.currentUser
+const user = auth.currentUser
 
-const list=document.getElementById("certList")
+const userCerts=data.certificates.filter(c=>c.email===user.email)
 
 list.innerHTML=""
 
-data.certificates
-.filter(c=>c.email===user.email)
-.forEach(cert=>{
+if(userCerts.length===0){
+
+list.innerHTML="No certificates available"
+
+return
+
+}
+
+userCerts.forEach(cert=>{
 
 list.innerHTML+=`
 
@@ -179,7 +173,7 @@ list.innerHTML+=`
 
 <div>
 
-<h4 class="font-bold">${cert.course}</h4>
+<h4 class="font-bold text-blue-400">${cert.course}</h4>
 
 <p class="text-xs text-slate-400">${cert.type}</p>
 
@@ -198,12 +192,25 @@ View
 
 })
 
+}catch(err){
+
+list.innerHTML="Error loading certificates"
+console.error(err)
+
 }
+
+}
+
 
 
 /* BILLING */
 
-window.loadInvoices=async()=>{
+window.loadInvoices = async () => {
+
+const list=document.getElementById("invoiceList")
+list.innerHTML="Loading..."
+
+try{
 
 const res=await fetch(
 "https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
@@ -213,13 +220,18 @@ const bills=await res.json()
 
 const user=auth.currentUser
 
-const list=document.getElementById("invoiceList")
+const userBills=bills.filter(b=>b.email===user.email)
 
 list.innerHTML=""
 
-bills
-.filter(b=>b.email===user.email)
-.forEach(bill=>{
+if(userBills.length===0){
+
+list.innerHTML="No billing history"
+return
+
+}
+
+userBills.forEach(bill=>{
 
 list.innerHTML+=`
 
@@ -227,7 +239,7 @@ list.innerHTML+=`
 
 <div>
 
-<h4 class="font-bold">${bill.course}</h4>
+<h4 class="font-bold text-green-400">${bill.course}</h4>
 
 <p class="text-xs text-slate-400">
 ₹${bill.amount} • ${bill.date}
@@ -249,10 +261,17 @@ Verify
 
 })
 
+}catch(err){
+
+list.innerHTML="Error loading billing data"
+console.error(err)
+
+}
+
 }
 
 
-/* SIDEBAR TOGGLE */
+/* SIDEBAR */
 
 const sidebar=document.getElementById("sidebar")
 const toggle=document.getElementById("toggleSidebar")
