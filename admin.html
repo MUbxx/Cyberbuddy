@@ -1,132 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Buddy | Admin Terminal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { background-color: #0f172a; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); }
-        .cyber-border { border-left: 4px solid #22d3ee; }
-    </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cyber Buddy Admin</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+
+body{
+background:#0f172a;
+}
+
+.glass{
+background:rgba(30,41,59,0.7);
+backdrop-filter:blur(10px);
+}
+
+</style>
+
 </head>
 
 <body class="flex text-gray-100 min-h-screen">
 
-    <aside class="w-64 glass border-r border-gray-800 flex flex-col">
-        <div class="p-6">
-            <h1 class="text-2xl font-black tracking-tighter text-cyan-400">
-                CYBER<span class="text-white">BUDDY</span>
-            </h1>
-            <p class="text-xs text-gray-500 uppercase tracking-widest mt-1">Admin Terminal v2.0</p>
-        </div>
+<!-- SIDEBAR -->
 
-        <nav class="flex-1 px-4 space-y-2">
-            <a href="#" class="flex items-center p-3 rounded-lg bg-cyan-500/10 text-cyan-400 cyber-border">
-                <i class="fas fa-chart-line mr-3"></i> Dashboard
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-800 transition">
-                <i class="fas fa-users mr-3"></i> User Management
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-800 transition">
-                <i class="fas fa-graduation-cap mr-3"></i> Course Editor
-            </a>
-            <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-800 transition">
-                <i class="fas fa-shield-alt mr-3"></i> Security Logs
-            </a>
-        </nav>
+<aside class="w-64 glass border-r border-gray-800 flex flex-col">
 
-        <div class="p-4 border-t border-gray-800">
-            <button id="logoutBtn" class="w-full flex items-center justify-center bg-red-500/10 text-red-500 p-2 rounded-lg hover:bg-red-500 hover:text-white transition">
-                <i class="fas fa-sign-out-alt mr-2"></i> Logout
-            </button>
-        </div>
-    </aside>
+<div class="p-6">
 
-    <main class="flex-1 overflow-y-auto">
-        
-        <header class="p-6 flex justify-between items-center border-b border-gray-800 bg-gray-900/50">
-            <h2 class="text-xl font-semibold">Command Center</h2>
-            <div class="flex items-center space-x-4">
-                <span class="flex items-center text-sm text-green-400">
-                    <span class="h-2 w-2 bg-green-400 rounded-full animate-pulse mr-2"></span> System Online
-                </span>
-                <div class="h-10 w-10 rounded-full bg-gray-700 border border-cyan-400 flex items-center justify-center">
-                    <i class="fas fa-user-shield"></i>
-                </div>
-            </div>
-        </header>
+<h1 class="text-2xl font-black text-cyan-400">
+CYBER<span class="text-white">BUDDY</span>
+</h1>
 
-        <div class="p-8 space-y-8">
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass p-6 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-sm">Total Students</p>
-                    <h3 class="text-3xl font-bold mt-1" id="totalUsers">0</h3>
-                </div>
-                <div class="glass p-6 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-sm">Active Courses</p>
-                    <h3 class="text-3xl font-bold mt-1" id="totalCourses">0</h3>
-                </div>
-                <div class="glass p-6 rounded-xl border border-gray-800">
-                    <p class="text-gray-400 text-sm">Revenue (Monthly)</p>
-                    <h3 class="text-3xl font-bold mt-1 text-cyan-400">₹0.00</h3>
-                </div>
-            </div>
+<p class="text-xs text-gray-500 uppercase">
+Admin Terminal
+</p>
 
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                
-                <section class="glass rounded-xl border border-gray-800 overflow-hidden">
-                    <div class="p-4 bg-gray-800/50 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold">Registered Users</h3>
-                        <button class="text-xs text-cyan-400 hover:underline">View All</button>
-                    </div>
-                    <div class="p-0 overflow-x-auto">
-                        <table class="w-full text-left text-sm">
-                            <thead class="text-gray-400 uppercase text-[10px] tracking-widest border-b border-gray-800">
-                                <tr>
-                                    <th class="p-4">Name</th>
-                                    <th class="p-4">Email</th>
-                                    <th class="p-4">Status</th>
-                                    <th class="p-4">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersList">
-                                </tbody>
-                        </table>
-                    </div>
-                </section>
+</div>
 
-                <div class="space-y-8">
-                    <section class="glass p-6 rounded-xl border border-gray-800">
-                        <h3 class="font-bold mb-4 flex items-center">
-                            <i class="fas fa-plus-circle mr-2 text-cyan-400"></i> Deploy New Course
-                        </h3>
-                        <div class="space-y-4">
-                            <input id="title" type="text" placeholder="Course Title (e.g. Ethical Hacking 101)" 
-                                class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg focus:outline-none focus:border-cyan-400 transition">
-                            <input id="video" type="text" placeholder="Vimeo/YouTube Video URL" 
-                                class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg focus:outline-none focus:border-cyan-400 transition">
-                            <button id="uploadBtn" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-lg shadow-lg shadow-cyan-500/20 transition">
-                                Launch Course
-                            </button>
-                        </div>
-                    </section>
+<div class="p-4 border-t border-gray-800">
 
-                    <section class="glass rounded-xl border border-gray-800">
-                        <div class="p-4 bg-gray-800/50 border-b border-gray-700">
-                            <h3 class="font-bold">Live Courses</h3>
-                        </div>
-                        <div id="coursesList" class="p-4 space-y-3">
-                            </div>
-                    </section>
-                </div>
-            </div>
-        </div>
-    </main>
+<button id="logoutBtn"
+class="w-full bg-red-500 text-white p-2 rounded-lg">
 
-    <script type="module" src="js/admin.js"></script>
+Logout
+
+</button>
+
+</div>
+
+</aside>
+
+
+
+<!-- MAIN -->
+
+<main class="flex-1 overflow-y-auto">
+
+<header class="p-6 border-b border-gray-800">
+
+<h2 class="text-xl font-semibold">
+Admin Command Center
+</h2>
+
+</header>
+
+
+
+<div class="p-8 space-y-8">
+
+<!-- STATS -->
+
+<div class="grid grid-cols-2 gap-6">
+
+<div class="glass p-6 rounded-xl border border-gray-800">
+
+<p class="text-gray-400 text-sm">
+Total Users
+</p>
+
+<h3 id="totalUsers" class="text-3xl font-bold">
+0
+</h3>
+
+</div>
+
+<div class="glass p-6 rounded-xl border border-gray-800">
+
+<p class="text-gray-400 text-sm">
+Total Courses
+</p>
+
+<h3 id="totalCourses" class="text-3xl font-bold">
+0
+</h3>
+
+</div>
+
+</div>
+
+
+
+<!-- USERS TABLE -->
+
+<section class="glass rounded-xl border border-gray-800 overflow-hidden">
+
+<div class="p-4 border-b border-gray-700">
+
+<h3 class="font-bold">
+Users
+</h3>
+
+</div>
+
+<div class="overflow-x-auto">
+
+<table class="w-full text-left text-sm">
+
+<thead class="text-gray-400 text-xs border-b border-gray-800">
+
+<tr>
+
+<th class="p-4">Name</th>
+
+<th class="p-4">Email</th>
+
+<th class="p-4">Grant Course</th>
+
+<th class="p-4">Action</th>
+
+</tr>
+
+</thead>
+
+<tbody id="usersList"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+
+<!-- COURSE UPLOAD -->
+
+<section class="glass p-6 rounded-xl border border-gray-800">
+
+<h3 class="font-bold mb-4">
+Upload Course
+</h3>
+
+<input id="title"
+placeholder="Course Title"
+class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg mb-3">
+
+<input id="video"
+placeholder="Video URL"
+class="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg mb-3">
+
+<button id="uploadBtn"
+class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-3 rounded-lg">
+
+Upload Course
+
+</button>
+
+</section>
+
+
+
+<!-- COURSES LIST -->
+
+<section class="glass rounded-xl border border-gray-800">
+
+<div class="p-4 border-b border-gray-700">
+
+<h3 class="font-bold">
+Courses
+</h3>
+
+</div>
+
+<div id="coursesList" class="p-4 space-y-3"></div>
+
+</section>
+
+</div>
+
+</main>
+
+<script type="module" src="js/admin.js"></script>
+
 </body>
 </html>
