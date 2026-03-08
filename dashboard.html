@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cyber Buddy | Student Dashboard</title>
+<title>Cyber Buddy | Student Console</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -21,10 +21,26 @@ font-family:Inter,sans-serif;
 overflow:hidden;
 }
 
+/* glass */
+
 .glass{
 background:rgba(17,24,39,.6);
 backdrop-filter:blur(10px);
 border:1px solid rgba(255,255,255,.05);
+}
+
+/* sidebar */
+
+#sidebar{
+transition:all .3s ease;
+}
+
+#sidebar.collapsed{
+width:80px;
+}
+
+#sidebar.collapsed span{
+display:none;
 }
 
 .sidebar-item{
@@ -47,12 +63,7 @@ transform:translateY(-5px);
 box-shadow:0 15px 25px rgba(0,0,0,.6);
 }
 
-#sidebar{
-transition:all .3s ease;
-}
-
 </style>
-
 </head>
 
 <body class="flex h-screen">
@@ -86,44 +97,50 @@ Cyber<span class="text-blue-500">Buddy</span>
 <nav class="flex-1 space-y-2">
 
 <button onclick="switchTab('dashboard',this)"
-class="sidebar-item active w-full flex gap-3 px-4 py-3 rounded-xl">
+class="sidebar-item active w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
-<i class="fas fa-th-large"></i> Dashboard
+<i class="fas fa-th-large"></i>
+<span>Dashboard</span>
 
 </button>
 
 <button onclick="switchTab('mycourses',this)"
-class="sidebar-item w-full flex gap-3 px-4 py-3 rounded-xl">
+class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
-<i class="fas fa-play-circle"></i> My Courses
+<i class="fas fa-play-circle"></i>
+<span>My Courses</span>
 
 </button>
 
 <button onclick="switchTab('certificates',this)"
-class="sidebar-item w-full flex gap-3 px-4 py-3 rounded-xl">
+class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
-<i class="fas fa-award"></i> Certificates
+<i class="fas fa-award"></i>
+<span>Certificates</span>
 
 </button>
 
 <button onclick="switchTab('billing',this)"
-class="sidebar-item w-full flex gap-3 px-4 py-3 rounded-xl">
+class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
-<i class="fas fa-receipt"></i> Billing
+<i class="fas fa-receipt"></i>
+<span>Billing</span>
 
 </button>
 
 <button onclick="switchTab('profile',this)"
-class="sidebar-item w-full flex gap-3 px-4 py-3 rounded-xl">
+class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
-<i class="fas fa-user"></i> Profile
+<i class="fas fa-user"></i>
+<span>Profile</span>
 
 </button>
 
 <button onclick="switchTab('security',this)"
-class="sidebar-item w-full flex gap-3 px-4 py-3 rounded-xl">
+class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
-<i class="fas fa-shield-alt"></i> Security
+<i class="fas fa-shield-alt"></i>
+<span>Security</span>
 
 </button>
 
@@ -133,7 +150,7 @@ class="sidebar-item w-full flex gap-3 px-4 py-3 rounded-xl">
 class="text-red-500 mt-6 py-3 rounded-xl hover:bg-red-500/10">
 
 <i class="fas fa-sign-out-alt"></i>
-Sign Out
+<span>Sign Out</span>
 
 </button>
 
