@@ -1,17 +1,201 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+
+<title>Cyber Buddy Academy</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
-<body class="bg-gray-900 text-white p-8">
+<body class="bg-gray-900 text-white min-h-screen">
 
-<h1 class="text-2xl mb-6">Courses</h1>
+<!-- NAVBAR -->
 
-<div id="courses"></div>
+<header class="flex justify-between p-4 border-b border-gray-700">
 
-<script type="module" src="js/dashboard.js"></script>
+<h1 class="text-cyan-400 font-bold text-xl">
+Cyber Buddy Academy
+</h1>
+
+<div class="flex gap-6">
+
+<button onclick="showSection('dashboard')">Dashboard</button>
+
+<button onclick="showSection('courses')">My Courses</button>
+
+<button onclick="showSection('profile')">Profile</button>
+
+<button id="logoutBtn" class="bg-red-500 px-3 py-1 rounded">
+Logout
+</button>
+
+</div>
+
+</header>
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboard" class="p-8">
+
+<h2 class="text-2xl mb-6">Available Courses</h2>
+
+<div id="courseList"></div>
+
+</div>
+
+
+<!-- MY COURSES -->
+
+<div id="courses" class="p-8 hidden">
+
+<h2 class="text-2xl mb-6">My Courses</h2>
+
+<div id="myCourses"></div>
+
+</div>
+
+
+<!-- PROFILE -->
+
+<div id="profile" class="p-8 hidden">
+
+<h2 class="text-2xl mb-6">Profile</h2>
+
+<div class="bg-gray-800 p-6 rounded w-96">
+
+<p><b>Name:</b> <span id="name"></span></p>
+
+<p><b>Email:</b> <span id="email"></span></p>
+
+</div>
+
+</div>
+
+
+<script type="module">
+
+import { auth, db } from "./js/firebase.js";
+
+import {
+collection,
+getDocs,
+doc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+import {
+onAuthStateChanged,
+signOut
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+window.showSection = (section)=>{
+
+document.getElementById("dashboard").classList.add("hidden");
+document.getElementById("courses").classList.add("hidden");
+document.getElementById("profile").classList.add("hidden");
+
+document.getElementById(section).classList.remove("hidden");
+
+};
+
+
+onAuthStateChanged(auth, async (user)=>{
+
+if(!user){
+
+window.location="login.html";
+return;
+
+}
+
+
+/* PROFILE */
+
+const userDoc = await getDoc(doc(db,"users",user.uid));
+
+const userData = userDoc.data();
+
+document.getElementById("name").innerText = userData.name;
+
+document.getElementById("email").innerText = userData.email;
+
+
+/* ALL COURSES */
+
+const courseSnap = await getDocs(collection(db,"courses"));
+
+const list = document.getElementById("courseList");
+
+courseSnap.forEach(c=>{
+
+list.innerHTML += `
+
+<div class="bg-gray-800 p-4 mb-3 rounded">
+
+<h3>${c.data().title}</h3>
+
+<button onclick="openCourse('${c.id}')"
+class="bg-cyan-400 text-black px-3 py-1 rounded">
+
+Open
+
+</button>
+
+</div>
+
+`;
+
+});
+
+
+/* MY COURSES */
+
+const myCourses = document.getElementById("myCourses");
+
+const purchased = userData.purchasedCourses || [];
+
+purchased.forEach(id=>{
+
+myCourses.innerHTML += `
+
+<div class="bg-gray-800 p-4 mb-3 rounded">
+
+Course ID: ${id}
+
+<button onclick="openCourse('${id}')"
+class="bg-cyan-400 text-black px-3 py-1 rounded">
+
+Open
+
+</button>
+
+</div>
+
+`;
+
+});
+
+});
+
+
+window.openCourse = (id)=>{
+
+window.location = "course.html?id="+id;
+
+};
+
+
+document.getElementById("logoutBtn").onclick = async ()=>{
+
+await signOut(auth);
+
+window.location="login.html";
+
+};
+
+</script>
 
 </body>
 </html>
