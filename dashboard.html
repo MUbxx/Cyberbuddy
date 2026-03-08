@@ -22,7 +22,7 @@ font-family:Inter,sans-serif;
 overflow:hidden;
 }
 
-/* glass card */
+/* glass cards */
 
 .glass{
 background:rgba(17,24,39,.6);
@@ -44,24 +44,15 @@ min-width:85px;
 padding:1.5rem 1rem;
 }
 
-/* hide labels */
-
 #sidebar.collapsed span,
 #sidebar.collapsed h1{
 display:none;
 }
 
-/* center icons */
-
 #sidebar.collapsed .sidebar-item{
 justify-content:center;
 padding-left:0;
 padding-right:0;
-}
-
-#sidebar.collapsed .sidebar-item i{
-margin:0;
-font-size:1.25rem;
 }
 
 .sidebar-item{
@@ -87,7 +78,6 @@ box-shadow:0 15px 25px rgba(0,0,0,.6);
 </style>
 
 </head>
-
 
 <body class="flex h-screen">
 
@@ -174,6 +164,7 @@ class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl">
 
 </nav>
 
+
 <button id="logoutBtn"
 class="text-red-500 mt-6 py-3 rounded-xl hover:bg-red-500/10">
 
@@ -183,7 +174,6 @@ class="text-red-500 mt-6 py-3 rounded-xl hover:bg-red-500/10">
 </button>
 
 </aside>
-
 
 
 <!-- MAIN -->
@@ -204,8 +194,6 @@ class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-sm">
 <div class="flex-1 overflow-y-auto p-10 space-y-10">
 
 
-<!-- DASHBOARD -->
-
 <section id="dashboard">
 
 <h3 class="text-xl font-bold">Available Courses</h3>
@@ -215,8 +203,6 @@ class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-6"></div>
 
 </section>
 
-
-<!-- MY COURSES -->
 
 <section id="mycourses" class="hidden">
 
@@ -228,8 +214,6 @@ class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-6"></div>
 </section>
 
 
-<!-- CERTIFICATES -->
-
 <section id="certificates" class="hidden">
 
 <h3 class="text-xl font-bold">Certificates</h3>
@@ -239,8 +223,6 @@ class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-6"></div>
 </section>
 
 
-<!-- BILLING -->
-
 <section id="billing" class="hidden">
 
 <h3 class="text-xl font-bold">Billing</h3>
@@ -249,8 +231,6 @@ class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 mt-6"></div>
 
 </section>
 
-
-<!-- PROFILE -->
 
 <section id="profile" class="hidden">
 
@@ -280,8 +260,6 @@ Update Profile
 </section>
 
 
-<!-- SECURITY -->
-
 <section id="security" class="hidden">
 
 <button id="resetBtn"
@@ -292,7 +270,6 @@ Send Password Reset Link
 </button>
 
 </section>
-
 
 </div>
 
