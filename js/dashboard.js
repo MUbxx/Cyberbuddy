@@ -5,63 +5,94 @@ collection,
 getDocs,
 doc,
 getDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
 signOut
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
-const grid=document.getElementById("coursesGrid");
+const coursesGrid = document.getElementById("coursesGrid");
+const logoutBtn = document.getElementById("logoutBtn");
 
 
-onAuthStateChanged(auth,async(user)=>{
+/* AUTH CHECK */
+
+onAuthStateChanged(auth, async (user)=>{
 
 if(!user){
 
-location="login.html";
+window.location="login.html";
 return;
 
 }
 
-const userSnap=await getDoc(doc(db,"users",user.uid));
-const userData=userSnap.data();
+const userRef = doc(db,"users",user.uid);
+const userSnap = await getDoc(userRef);
+
+const userData = userSnap.data();
 
 loadCourses(userData);
 
 });
 
 
+
+/* LOAD COURSES */
+
 async function loadCourses(userData){
 
-const courses=await getDocs(collection(db,"courses"));
+coursesGrid.innerHTML = "";
 
-grid.innerHTML="";
+const coursesSnap = await getDocs(collection(db,"courses"));
 
-courses.forEach(course=>{
+coursesSnap.forEach(course=>{
 
-const data=course.data();
+const data = course.data();
+const courseId = course.id;
 
-const access=userData.purchasedCourses?.includes(course.id);
+const hasAccess =
+userData.purchasedCourses?.includes(courseId);
 
-grid.innerHTML+=`
 
-<div class="bg-gray-800 p-4 rounded-lg">
+coursesGrid.innerHTML += `
 
-<img src="${data.image}" class="rounded mb-3">
+<div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition">
 
-<h3 class="font-bold">${data.title}</h3>
+<img src="${data.image}"
+class="w-full h-48 object-cover">
 
-<p class="text-gray-400 text-sm mb-3">${data.description}</p>
+<div class="p-5">
+
+<h3 class="text-lg font-bold mb-2">
+${data.title}
+</h3>
+
+<p class="text-slate-400 text-sm mb-4">
+${data.description}
+</p>
 
 ${
-access
+hasAccess
 ?
-`<a href="course-player.html?id=${course.id}" class="bg-cyan-400 text-black px-4 py-2 rounded">Start Learning</a>`
+`<a href="course.html?id=${courseId}"
+class="bg-cyan-400 hover:bg-cyan-300 text-black px-4 py-2 rounded-lg text-sm">
+
+Start Learning
+
+</a>`
 :
-`<button class="bg-gray-600 px-4 py-2 rounded">Locked</button>`
+`<button class="bg-slate-600 px-4 py-2 rounded-lg text-sm cursor-not-allowed">
+
+Locked
+
+</button>`
 }
+
+</div>
 
 </div>
 
@@ -72,10 +103,13 @@ access
 }
 
 
-document.getElementById("logoutBtn").onclick=()=>{
 
-signOut(auth);
+/* LOGOUT */
 
-location="login.html";
+logoutBtn.addEventListener("click", async ()=>{
 
-};
+await signOut(auth);
+
+window.location="login.html";
+
+});
