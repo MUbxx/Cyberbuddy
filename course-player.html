@@ -1,0 +1,22 @@
+<iframe id="video" width="800" height="450"></iframe>
+
+<script type="module">
+
+import { db } from "./js/firebase.js";
+
+import {
+doc,
+getDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+const params = new URLSearchParams(window.location.search);
+
+const id = params.get("id");
+
+const docRef = doc(db,"courses",id);
+
+const snap = await getDoc(docRef);
+
+document.getElementById("video").src = snap.data().video;
+
+</script>
