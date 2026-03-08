@@ -1,69 +1,98 @@
 import { auth, db } from "./firebase.js";
 
 import {
-createUserWithEmailAndPassword,
-signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+signInWithEmailAndPassword,
+GoogleAuthProvider,
+signInWithPopup,
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 import {
 doc,
 setDoc,
 getDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const loginBtn = document.getElementById("loginBtn");
-const registerBtn = document.getElementById("registerBtn");
 
-if(loginBtn){
+/* AUTO LOGIN REDIRECT */
 
-loginBtn.onclick = async ()=>{
+onAuthStateChanged(auth,(user)=>{
 
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+if(user){
+window.location="dashboard.html";
+}
 
-const user = await signInWithEmailAndPassword(auth,email,password);
+});
 
-const userDoc = await getDoc(doc(db,"users",user.user.uid));
 
-const role = userDoc.data().role;
+/* EMAIL LOGIN */
 
-if(role==="admin"){
+document.getElementById("loginBtn").onclick = async () => {
 
-window.location="admin.html";
+const email=document.getElementById("email").value;
+const password=document.getElementById("password").value;
 
-}else{
+try{
+
+await signInWithEmailAndPassword(auth,email,password);
 
 window.location="dashboard.html";
 
 }
+catch(err){
 
-};
+alert("Login Failed: "+err.message);
 
 }
 
-if(registerBtn){
+};
 
-registerBtn.onclick = async ()=>{
 
-const name = document.getElementById("name").value;
-const email = document.getElementById("email").value;
-const password = document.getElementById("password").value;
+/* GOOGLE OAUTH LOGIN */
 
-const user = await createUserWithEmailAndPassword(auth,email,password);
+document.getElementById("googleLoginBtn").onclick = async () => {
 
-await setDoc(doc(db,"users",user.user.uid),{
+const provider=new GoogleAuthProvider();
 
-name:name,
-email:email,
-role:"student",
-purchasedCourses:[]
+try{
+
+const result = await signInWithPopup(auth,provider);
+
+const user=result.user;
+
+/* CHECK IF USER EXISTS */
+
+const ref=doc(db,"users",user.uid);
+
+const snap=await getDoc(ref);
+
+if(!snap.exists()){
+
+await setDoc(ref,{
+
+name:user.displayName,
+email:user.email,
+phone:"",
+purchasedCourses:[],
+createdAt:new Date()
 
 });
 
-alert("Registered successfully");
+}
 
-window.location="login.html";
+/* REDIRECT */
 
-};
+window.location="dashboard.html";
 
 }
+catch(err){
+
+console.error(err);
+
+alert("Google Login Failed");
+
+}
+
+};
