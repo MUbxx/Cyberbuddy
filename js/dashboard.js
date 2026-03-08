@@ -4,92 +4,85 @@ import {
 collection,
 getDocs,
 doc,
-getDoc
+getDoc,
+onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
-signOut
+signOut,
+sendPasswordResetEmail
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
-const coursesGrid = document.getElementById("coursesGrid");
-const logoutBtn = document.getElementById("logoutBtn");
+const coursesGrid=document.getElementById("coursesGrid");
+const myCoursesGrid=document.getElementById("myCoursesGrid");
+
+let userData;
 
 
-/* AUTH CHECK */
+/* AUTH */
 
-onAuthStateChanged(auth, async (user)=>{
+onAuthStateChanged(auth,async(user)=>{
 
 if(!user){
-
 window.location="login.html";
 return;
-
 }
 
-const userRef = doc(db,"users",user.uid);
-const userSnap = await getDoc(userRef);
+const ref=doc(db,"users",user.uid);
 
-const userData = userSnap.data();
+onSnapshot(ref,(snap)=>{
 
-loadCourses(userData);
+userData=snap.data();
+
+loadCourses();
+
+});
 
 });
 
 
-
 /* LOAD COURSES */
 
-async function loadCourses(userData){
+async function loadCourses(){
 
-coursesGrid.innerHTML = "";
+coursesGrid.innerHTML="";
+myCoursesGrid.innerHTML="";
 
-const coursesSnap = await getDocs(collection(db,"courses"));
+const courses=await getDocs(collection(db,"courses"));
 
-coursesSnap.forEach(course=>{
+courses.forEach(course=>{
 
-const data = course.data();
-const courseId = course.id;
+const data=course.data();
+const id=course.id;
 
-const hasAccess =
-userData.purchasedCourses?.includes(courseId);
+const access=userData.purchasedCourses?.includes(id);
 
+const card=`
 
-coursesGrid.innerHTML += `
-
-<div class="bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition">
+<div class="glass rounded-xl overflow-hidden">
 
 <img src="${data.image}"
-class="w-full h-48 object-cover">
+class="h-40 w-full object-cover">
 
-<div class="p-5">
+<div class="p-4">
 
-<h3 class="text-lg font-bold mb-2">
-${data.title}
-</h3>
+<h3 class="font-bold">${data.title}</h3>
 
-<p class="text-slate-400 text-sm mb-4">
-${data.description}
+<p class="text-sm text-slate-400 mb-4">
+${data.description||""}
 </p>
 
 ${
-hasAccess
+access
 ?
-`<a href="course.html?id=${courseId}"
-class="bg-cyan-400 hover:bg-cyan-300 text-black px-4 py-2 rounded-lg text-sm">
-
-Start Learning
-
-</a>`
+`<a href="course.html?id=${id}"
+class="bg-cyan-500 px-4 py-2 rounded">Start Learning</a>`
 :
-`<button class="bg-slate-600 px-4 py-2 rounded-lg text-sm cursor-not-allowed">
-
-Locked
-
-</button>`
+`<button class="bg-slate-700 px-4 py-2 rounded">Locked</button>`
 }
 
 </div>
@@ -98,18 +91,62 @@ Locked
 
 `;
 
+coursesGrid.innerHTML+=card;
+
+if(access){
+myCoursesGrid.innerHTML+=card;
+}
+
 });
 
 }
 
 
 
+/* SIDEBAR TOGGLE */
+
+document.getElementById("toggleSidebar").onclick=()=>{
+document.getElementById("sidebar").classList.toggle("collapsed");
+};
+
+
+
+/* TAB SWITCHING */
+
+document.querySelectorAll(".navBtn").forEach(btn=>{
+
+btn.onclick=()=>{
+
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+
+document.getElementById(btn.dataset.tab).classList.add("active");
+
+};
+
+});
+
+
+
 /* LOGOUT */
 
-logoutBtn.addEventListener("click", async ()=>{
+document.getElementById("logoutBtn").onclick=async()=>{
 
 await signOut(auth);
 
 window.location="login.html";
 
-});
+};
+
+
+
+/* PASSWORD RESET */
+
+document.getElementById("resetBtn").onclick=async()=>{
+
+const user=auth.currentUser;
+
+await sendPasswordResetEmail(auth,user.email);
+
+alert("Password reset email sent");
+
+};
