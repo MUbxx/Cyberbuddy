@@ -199,132 +199,82 @@ createCourseCard(course.id,course,access);
 
 
 /* ===============================
-   CERTIFICATES
+   CERTIFICATES (FIXED)
 ================================ */
+async function loadCertificates(user) {
+    if (!user || !user.email) return; // Guard clause
+    certList.innerHTML = "Loading certificates...";
 
-async function loadCertificates(user){ // Passed user as argument
+    try {
+        const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json");
+        const data = await res.json();
 
-certList.innerHTML="Loading certificates...";
+        // Debugging: See what is actually in your JSON vs your login
+        console.log("Current User Email:", user.email.toLowerCase());
+        console.log("JSON Data Received:", data.certificates);
 
-try{
+        const userCerts = data.certificates.filter(cert => {
+            return cert.email && cert.email.toLowerCase().trim() === user.email.toLowerCase().trim();
+        });
 
-const res = await fetch(
-"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
-);
+        certList.innerHTML = "";
 
-const data = await res.json();
-
-// FIX: Added safety check for email existence before toLowerCase()
-const userCerts = data.certificates.filter(cert =>
-cert.email && user.email && cert.email.toLowerCase() === user.email.toLowerCase()
-);
-
-certList.innerHTML="";
-
-if(userCerts.length===0){
-
-certList.innerHTML="No certificates found";
-
-}else{
-
-userCerts.forEach(cert=>{
-
-certList.innerHTML += `
-
-<div class="glass p-5 rounded-xl flex justify-between">
-
-<div>
-<h4 class="font-bold text-blue-400">${cert.course}</h4>
-<p class="text-xs text-slate-400">${cert.type} • ${cert.duration}</p>
-</div>
-
-<a href="certificate.html?id=${cert.certId}"
-class="bg-blue-600 px-4 py-2 rounded-lg text-xs">
-View
-</a>
-
-</div>
-
-`;
-
-});
-
+        if (userCerts.length === 0) {
+            certList.innerHTML = "No certificates found for " + user.email;
+        } else {
+            userCerts.forEach(cert => {
+                certList.innerHTML += `
+                <div class="glass p-5 rounded-xl flex justify-between mb-3">
+                    <div>
+                        <h4 class="font-bold text-blue-400">${cert.course}</h4>
+                        <p class="text-xs text-slate-400">${cert.type} • ${cert.duration}</p>
+                    </div>
+                    <a href="certificate.html?id=${cert.certId}" class="bg-blue-600 px-4 py-2 rounded-lg text-xs">View</a>
+                </div>`;
+            });
+        }
+        statCertificates.innerText = userCerts.length;
+    } catch (err) {
+        console.error("Cert Error:", err);
+        certList.innerHTML = "Error parsing certificate data";
+    }
 }
-
-statCertificates.innerText = userCerts.length;
-
-}catch(err){
-
-certList.innerHTML="Failed to load certificates";
-
-}
-
-}
-
-
 
 /* ===============================
-   BILLING
+   BILLING (FIXED)
 ================================ */
+async function loadInvoices(user) {
+    if (!user || !user.email) return;
+    invoiceList.innerHTML = "Loading billing...";
 
-async function loadInvoices(user){ // Passed user as argument
+    try {
+        const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json");
+        const bills = await res.json();
 
-invoiceList.innerHTML="Loading billing...";
+        const userBills = bills.filter(bill => {
+            return bill.email && bill.email.toLowerCase().trim() === user.email.toLowerCase().trim();
+        });
 
-try{
+        invoiceList.innerHTML = "";
 
-const res = await fetch(
-"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
-);
-
-const bills = await res.json();
-
-// FIX: Added safety check for email existence
-const userBills = bills.filter(bill =>
-bill.email && user.email && bill.email.toLowerCase() === user.email.toLowerCase()
-);
-
-invoiceList.innerHTML="";
-
-if(userBills.length===0){
-
-invoiceList.innerHTML="No billing history";
-
-}else{
-
-userBills.forEach(bill=>{
-
-invoiceList.innerHTML += `
-
-<div class="glass p-5 rounded-xl flex justify-between">
-
-<div>
-<h4 class="font-bold text-green-400">${bill.course}</h4>
-<p class="text-xs text-slate-400">
-₹${bill.amount} • ${bill.date}
-</p>
-</div>
-
-<a href="${bill.verifyUrl}"
-target="_blank"
-class="bg-slate-800 px-4 py-2 rounded-lg text-xs">
-Verify
-</a>
-
-</div>
-
-`;
-
-});
-
-}
-
-}catch(err){
-
-invoiceList.innerHTML="Failed to load billing";
-
-}
-
+        if (userBills.length === 0) {
+            invoiceList.innerHTML = "No billing history found";
+        } else {
+            userBills.forEach(bill => {
+                invoiceList.innerHTML += `
+                <div class="glass p-5 rounded-xl flex justify-between mb-3">
+                    <div>
+                        <h4 class="font-bold text-green-400">${bill.course}</h4>
+                        <p class="text-xs text-slate-400">₹${bill.amount} • ${bill.date}</p>
+                    </div>
+                    <a href="${bill.verifyUrl}" target="_blank" class="bg-slate-800 px-4 py-2 rounded-lg text-xs">Verify</a>
+                </div>`;
+            });
+        }
+    } catch (err) {
+        console.error("Billing Error:", err);
+        invoiceList.innerHTML = "Error parsing billing data";
+    }
 }
 
 
@@ -414,3 +364,4 @@ document.getElementById(btn.dataset.tab)
 };
 
 });
+
