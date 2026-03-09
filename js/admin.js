@@ -8,7 +8,6 @@ getDoc,
 setDoc,
 updateDoc,
 deleteDoc,
-addDoc,
 arrayUnion,
 arrayRemove
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -19,13 +18,14 @@ onAuthStateChanged,
 sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+const usersList=document.getElementById("usersList");
+const coursesList=document.getElementById("coursesList");
 
-const usersList = document.getElementById("usersList");
-const coursesList = document.getElementById("coursesList");
+const totalUsers=document.getElementById("totalUsers");
+const totalCourses=document.getElementById("totalCourses");
+const totalEnrollments=document.getElementById("totalEnrollments");
+const activeCourses=document.getElementById("activeCourses");
 
-const totalUsers = document.getElementById("totalUsers");
-const totalCourses = document.getElementById("totalCourses");
-const totalEnrollments = document.getElementById("totalEnrollments");
 
 
 function toast(msg){
@@ -73,7 +73,7 @@ let enrollments=0;
 const courseNames=[];
 
 
-/* LOAD COURSES */
+/* COURSES */
 
 courses.forEach(c=>{
 
@@ -81,36 +81,21 @@ courseNames.push(c.id);
 
 coursesList.innerHTML+=`
 
-<div class="glass p-4 rounded space-y-3">
-
-<div class="flex justify-between">
+<div class="glass p-3 rounded flex justify-between">
 
 <div>
 <p class="font-bold">${c.data().title}</p>
 <p class="text-xs text-gray-400">${c.data().description}</p>
 </div>
 
-<button onclick="deleteCourse('${c.id}')" 
+<button onclick="deleteCourse('${c.id}')"
 class="bg-red-500 px-2 py-1 text-xs rounded">
 Delete
 </button>
 
 </div>
 
-<input id="module-${c.id}" placeholder="Module Name"
-class="bg-gray-900 p-2 rounded w-full">
-
-<button onclick="addModule('${c.id}')"
-class="bg-green-500 px-3 py-1 text-black rounded text-xs">
-Add Module
-</button>
-
-<div id="modules-${c.id}" class="space-y-2"></div>
-
-</div>
 `;
-
-loadModules(c.id);
 
 });
 
@@ -130,6 +115,7 @@ const tr=document.createElement("tr");
 tr.innerHTML=`
 
 <td class="p-3">${d.name}</td>
+
 <td class="p-3">${d.email}</td>
 
 <td class="p-3 text-green-400 text-xs">
@@ -185,20 +171,46 @@ usersList.appendChild(tr);
 });
 
 totalEnrollments.innerText=enrollments;
+activeCourses.innerText=courseNames.length;
+
+initSearch();
 
 }
 
 
 
-/* CREATE COURSE */
+/* SEARCH FIX */
 
-document.getElementById("createCourse").onclick=async()=>{
+function initSearch(){
 
-const title=document.getElementById("courseTitle").value;
-const description=document.getElementById("courseDescription").value;
-const image=document.getElementById("courseImage").value;
+const search=document.getElementById("userSearch");
 
-if(!title || !description || !image){
+search.addEventListener("input",function(){
+
+const q=this.value.toLowerCase();
+
+document.querySelectorAll("#usersList tr").forEach(row=>{
+
+row.style.display=row.innerText.toLowerCase().includes(q)?"":"none";
+
+});
+
+});
+
+}
+
+
+
+/* COURSE UPLOAD */
+
+document.getElementById("uploadBtn").onclick=async()=>{
+
+const title=document.getElementById("title").value;
+const description=document.getElementById("description").value;
+const image=document.getElementById("image").value;
+const video=document.getElementById("video").value;
+
+if(!title || !description || !image || !video){
 toast("Fill all fields");
 return;
 }
@@ -206,145 +218,19 @@ return;
 await setDoc(doc(db,"courses",title),{
 title,
 description,
-image
-});
-
-toast("Course created");
-
-loadDashboard();
-
-};
-
-
-
-/* ADD MODULE (FIXED) */
-
-window.addModule=async(courseId)=>{
-
-const name=document.getElementById(`module-${courseId}`).value;
-
-if(!name){
-toast("Enter module name");
-return;
-}
-
-await addDoc(collection(db,"courses",courseId,"modules"),{
-title:name
-});
-
-toast("Module added");
-
-loadModules(courseId);
-
-};
-
-
-
-/* LOAD MODULES */
-
-async function loadModules(courseId){
-
-const container=document.getElementById(`modules-${courseId}`);
-
-container.innerHTML="";
-
-const mods=await getDocs(collection(db,"courses",courseId,"modules"));
-
-mods.forEach(m=>{
-
-container.innerHTML+=`
-
-<div class="bg-slate-900 p-3 rounded space-y-2">
-
-<div class="flex justify-between">
-
-<p class="text-sm font-bold">${m.data().title}</p>
-
-<button onclick="deleteModule('${courseId}','${m.id}')"
-class="text-red-400 text-xs">
-Delete
-</button>
-
-</div>
-
-<input id="lesson-title-${m.id}"
-placeholder="Lesson Title"
-class="bg-gray-800 p-1 rounded w-full text-xs">
-
-<input id="lesson-video-${m.id}"
-placeholder="Video URL"
-class="bg-gray-800 p-1 rounded w-full text-xs">
-
-<button onclick="addLesson('${courseId}','${m.id}')"
-class="bg-cyan-500 px-2 py-1 text-xs rounded text-black">
-Add Lesson
-</button>
-
-</div>
-`;
-
-});
-
-}
-
-
-
-/* ADD LESSON */
-
-window.addLesson=async(course,module)=>{
-
-const title=document.getElementById(`lesson-title-${module}`).value;
-const video=document.getElementById(`lesson-video-${module}`).value;
-
-if(!title || !video){
-toast("Fill lesson fields");
-return;
-}
-
-await addDoc(collection(db,"courses",course,"modules",module,"lessons"),{
-title,
+image,
 video
 });
 
-toast("Lesson added");
-
-};
-
-
-
-/* DELETE MODULE */
-
-window.deleteModule=async(course,module)=>{
-
-if(!confirm("Delete module?")) return;
-
-await deleteDoc(doc(db,"courses",course,"modules",module));
-
-toast("Module deleted");
-
-loadModules(course);
-
-};
-
-
-
-/* USER MANAGEMENT */
-
-window.updateUserName=async(uid)=>{
-
-const name=document.getElementById(`name-${uid}`).value;
-
-await updateDoc(doc(db,"users",uid),{
-name:name
-});
-
-toast("Name updated");
+toast("Course uploaded");
 
 loadDashboard();
 
 };
 
 
+
+/* GRANT */
 
 window.grant=async(uid)=>{
 
@@ -356,9 +242,13 @@ purchasedCourses:arrayUnion(course)
 
 toast("Course granted");
 
+loadDashboard();
+
 };
 
 
+
+/* REVOKE FIX */
 
 window.revoke=async(uid)=>{
 
@@ -370,9 +260,31 @@ purchasedCourses:arrayRemove(course)
 
 toast("Course revoked");
 
+loadDashboard();
+
 };
 
 
+
+/* UPDATE NAME */
+
+window.updateUserName=async(uid)=>{
+
+const name=document.getElementById(`name-${uid}`).value;
+
+await updateDoc(doc(db,"users",uid),{
+name
+});
+
+toast("Name updated");
+
+loadDashboard();
+
+};
+
+
+
+/* DELETE USER */
 
 window.deleteUser=async(uid)=>{
 
@@ -387,6 +299,8 @@ loadDashboard();
 };
 
 
+
+/* DELETE COURSE */
 
 window.deleteCourse=async(id)=>{
 
@@ -408,11 +322,6 @@ document.getElementById("resetPassword").onclick=async()=>{
 
 const email=document.getElementById("resetEmail").value;
 
-if(!email){
-toast("Enter email");
-return;
-}
-
 await sendPasswordResetEmail(auth,email);
 
 toast("Reset email sent");
@@ -433,8 +342,13 @@ window.location="login.html";
 /* TABS */
 
 document.querySelectorAll(".navBtn").forEach(btn=>{
+
 btn.onclick=()=>{
+
 document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+
 document.getElementById(btn.dataset.tab).classList.add("active");
+
 };
+
 });
