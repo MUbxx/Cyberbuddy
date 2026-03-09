@@ -4,7 +4,6 @@ import {
 collection,
 getDocs,
 doc,
-getDoc,
 onSnapshot,
 updateDoc
 }
@@ -18,9 +17,7 @@ sendPasswordResetEmail
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
-/* ===============================
-DOM
-================================ */
+/* DOM */
 
 const coursesGrid = document.getElementById("coursesGrid");
 const myCoursesGrid = document.getElementById("myCoursesGrid");
@@ -52,10 +49,10 @@ let allCourses = [];
 AUTH CHECK
 ================================ */
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
 
-if (!user) {
-window.location = "login.html";
+if(!user){
+window.location="login.html";
 return;
 }
 
@@ -63,20 +60,17 @@ if(profileEmailDisplay){
 profileEmailDisplay.innerText = user.email;
 }
 
-/* load external data */
+const userRef = doc(db,"users",user.uid);
 
-loadCertificates(user);
-loadInvoices(user);
+/* listen for user document */
 
-const userRef = doc(db, "users", user.uid);
-
-/* realtime profile updates */
-
-onSnapshot(userRef, (snap) => {
+onSnapshot(userRef,(snap)=>{
 
 userData = snap.data();
 
-if(userData){
+if(!userData) return;
+
+/* profile fields */
 
 editName.value = userData.name || "";
 editPhone.value = userData.phone || "";
@@ -90,9 +84,11 @@ if(profilePhoto && userData.photoURL){
 profilePhoto.src = userData.photoURL;
 }
 
-loadCourses();
+/* LOAD DATA AFTER USER READY */
 
-}
+loadCourses();
+loadCertificates(user);
+loadInvoices(user);
 
 });
 
@@ -105,23 +101,25 @@ LOAD COURSES
 
 async function loadCourses(){
 
-coursesGrid.innerHTML = "";
-myCoursesGrid.innerHTML = "";
+coursesGrid.innerHTML="";
+myCoursesGrid.innerHTML="";
 
-const coursesSnap = await getDocs(collection(db,"courses"));
+try{
 
-allCourses = [];
+const snap = await getDocs(collection(db,"courses"));
 
-coursesSnap.forEach(course=>{
+allCourses=[];
 
-const data = course.data();
-const courseId = course.id;
+snap.forEach(c=>{
 
-allCourses.push({id:courseId,...data});
+const data = c.data();
+const id = c.id;
 
-const access = userData?.purchasedCourses?.includes(courseId);
+allCourses.push({id,...data});
 
-const card = createCourseCard(courseId,data,access);
+const access = userData?.purchasedCourses?.includes(id);
+
+const card = createCourseCard(id,data,access);
 
 coursesGrid.innerHTML += card;
 
@@ -133,6 +131,10 @@ myCoursesGrid.innerHTML += card;
 
 statCourses.innerText = userData?.purchasedCourses?.length || 0;
 
+}catch(e){
+console.error("Course load error:",e);
+}
+
 }
 
 
@@ -140,25 +142,25 @@ statCourses.innerText = userData?.purchasedCourses?.length || 0;
 COURSE CARD
 ================================ */
 
-function createCourseCard(courseId,data,access){
+function createCourseCard(id,data,access){
+
+const img = data.image || data.thumbnail || "https://via.placeholder.com/400x200";
 
 return `
 <div class="glass rounded-xl overflow-hidden border border-slate-800 hover:border-cyan-400 transition">
 
-<img src="${data.image || data.thumbnail || 'https://via.placeholder.com/400x200'}"
-class="w-full h-40 object-cover">
+<img src="${img}" class="w-full h-40 object-cover">
 
 <div class="p-5">
 
-<h3 class="font-bold text-lg mb-2">${data.title || courseId}</h3>
+<h3 class="font-bold text-lg mb-2">${data.title || id}</h3>
 
 <p class="text-sm text-slate-400 mb-4">
 ${data.description || ""}
 </p>
 
-${
-access
-? `<a href="course.html?id=${courseId}"
+${access
+? `<a href="course.html?id=${id}"
 class="bg-cyan-400 text-black px-4 py-2 rounded-lg text-sm font-bold block text-center">
 Start Learning
 </a>`
@@ -170,29 +172,28 @@ Locked
 </div>
 </div>
 `;
-
 }
 
 
 /* ===============================
-COURSE SEARCH
+SEARCH
 ================================ */
 
 if(searchInput){
 
 searchInput.addEventListener("input",()=>{
 
-const query = searchInput.value.toLowerCase();
+const q = searchInput.value.toLowerCase();
 
-coursesGrid.innerHTML = "";
+coursesGrid.innerHTML="";
 
-allCourses.forEach(course=>{
+allCourses.forEach(c=>{
 
-if((course.title || "").toLowerCase().includes(query)){
+if((c.title || "").toLowerCase().includes(q)){
 
-const access = userData?.purchasedCourses?.includes(course.id);
+const access = userData?.purchasedCourses?.includes(c.id);
 
-coursesGrid.innerHTML += createCourseCard(course.id,course,access);
+coursesGrid.innerHTML += createCourseCard(c.id,c,access);
 
 }
 
@@ -209,74 +210,56 @@ CERTIFICATES
 
 async function loadCertificates(user){
 
-if(!user || !user.email) return;
+if(!user?.email) return;
 
-certList.innerHTML = "Loading certificates...";
+certList.innerHTML="Loading certificates...";
 
 try{
 
-const res = await fetch(
-"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
-);
-
+const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json");
 const data = await res.json();
 
-const userCerts = (data.certificates || []).filter(cert =>
+const list = (data.certificates || []).filter(c=>
 
-(cert.email || "")
-.toLowerCase()
-.trim() === user.email.toLowerCase().trim()
+(c.email || "").toLowerCase().trim()
+=== user.email.toLowerCase().trim()
 
 );
 
-certList.innerHTML = "";
+certList.innerHTML="";
 
-if(userCerts.length === 0){
+if(list.length===0){
+certList.innerHTML="No certificates found";
+return;
+}
 
-certList.innerHTML = "No certificates found";
-
-}else{
-
-userCerts.forEach(cert=>{
+list.forEach(cert=>{
 
 certList.innerHTML += `
-
 <div class="glass p-5 rounded-xl flex justify-between items-center mb-3">
 
 <div>
-
-<h4 class="font-bold text-blue-400">
-${cert.course}
-</h4>
-
-<p class="text-xs text-slate-400">
-${cert.type} • ${cert.duration}
-</p>
-
+<h4 class="font-bold text-blue-400">${cert.course}</h4>
+<p class="text-xs text-slate-400">${cert.type} • ${cert.duration}</p>
 </div>
 
 <a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${cert.certId}"
-class="bg-blue-600 px-4 py-2 rounded-lg text-xs hover:bg-blue-500 transition">
-
+class="bg-blue-600 px-4 py-2 rounded-lg text-xs">
 View
-
 </a>
 
 </div>
-
 `;
 
 });
 
-}
+statCertificates.innerText = list.length;
 
-statCertificates.innerText = userCerts.length;
+}catch(e){
 
-}catch(err){
+console.error("Certificate error:",e);
 
-console.error("Certificate error:",err);
-
-certList.innerHTML = "Error loading certificates";
+certList.innerHTML="Certificate loading error";
 
 }
 
@@ -289,72 +272,54 @@ BILLING
 
 async function loadInvoices(user){
 
-if(!user || !user.email) return;
+if(!user?.email) return;
 
-invoiceList.innerHTML = "Loading billing...";
+invoiceList.innerHTML="Loading billing...";
 
 try{
 
-const res = await fetch(
-"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
-);
-
+const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json");
 const bills = await res.json();
 
-const userBills = (bills || []).filter(bill =>
+const list = (bills || []).filter(b=>
 
-(bill.email || "")
-.toLowerCase()
-.trim() === user.email.toLowerCase().trim()
+(b.email || "").toLowerCase().trim()
+=== user.email.toLowerCase().trim()
 
 );
 
-invoiceList.innerHTML = "";
+invoiceList.innerHTML="";
 
-if(userBills.length === 0){
+if(list.length===0){
+invoiceList.innerHTML="No billing history found";
+return;
+}
 
-invoiceList.innerHTML = "No billing history found";
-
-}else{
-
-userBills.forEach(bill=>{
+list.forEach(b=>{
 
 invoiceList.innerHTML += `
-
 <div class="glass p-5 rounded-xl flex justify-between items-center mb-3">
 
 <div>
-
-<h4 class="font-bold text-green-400">
-${bill.course}
-</h4>
-
-<p class="text-xs text-slate-400">
-₹${bill.amount} • ${bill.date}
-</p>
-
+<h4 class="font-bold text-green-400">${b.course}</h4>
+<p class="text-xs text-slate-400">₹${b.amount} • ${b.date}</p>
 </div>
 
-<a href="${bill.verifyUrl}" target="_blank"
-class="bg-slate-800 px-4 py-2 rounded-lg text-xs hover:bg-slate-700 transition">
-
+<a href="${b.verifyUrl}" target="_blank"
+class="bg-slate-800 px-4 py-2 rounded-lg text-xs">
 Verify
-
 </a>
 
 </div>
-
 `;
 
 });
 
-}
+}catch(e){
 
-}catch(err){
+console.error("Billing error:",e);
 
-console.error("Billing error:",err);
-
-invoiceList.innerHTML = "Error loading billing data";
+invoiceList.innerHTML="Billing loading error";
 
 }
 
@@ -368,11 +333,10 @@ PROFILE UPDATE
 document.getElementById("saveProfile").onclick = async ()=>{
 
 const user = auth.currentUser;
-const ref = doc(db,"users",user.uid);
 
 try{
 
-await updateDoc(ref,{
+await updateDoc(doc(db,"users",user.uid),{
 name:editName.value,
 phone:editPhone.value,
 photoURL:editPhoto.value
@@ -380,9 +344,9 @@ photoURL:editPhoto.value
 
 alert("Profile updated");
 
-}catch(error){
+}catch(e){
 
-console.error("Update Error:",error);
+console.error("Profile update error:",e);
 
 alert("Failed to update profile");
 
@@ -418,13 +382,13 @@ logoutBtn.onclick = async ()=>{
 
 await signOut(auth);
 
-window.location = "login.html";
+window.location="login.html";
 
 };
 
 
 /* ===============================
-SIDEBAR TOGGLE
+SIDEBAR
 ================================ */
 
 document.getElementById("toggleSidebar").onclick = ()=>{
@@ -435,24 +399,16 @@ document.getElementById("sidebar").classList.toggle("collapsed");
 
 
 /* ===============================
-TAB SWITCHING
+TABS
 ================================ */
 
 document.querySelectorAll(".navBtn").forEach(btn=>{
 
-btn.onclick = ()=>{
+btn.onclick=()=>{
 
-document.querySelectorAll(".tab")
-.forEach(tab=>tab.classList.remove("active"));
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
 
-document.getElementById(btn.dataset.tab)
-.classList.add("active");
-
-const viewTitle = document.getElementById("viewTitle");
-
-if(viewTitle){
-viewTitle.innerText = btn.querySelector("span").innerText;
-}
+document.getElementById(btn.dataset.tab).classList.add("active");
 
 };
 
