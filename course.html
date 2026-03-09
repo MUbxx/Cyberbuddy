@@ -1,28 +1,70 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Course</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Course Player</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
-<body>
+<body class="bg-slate-950 text-white flex h-screen">
 
-<iframe id="video" width="900" height="500"></iframe>
+<!-- LESSON SIDEBAR -->
 
-<script type="module">
+<div class="w-80 bg-slate-900 border-r border-slate-800 overflow-y-auto">
 
-import { db } from "./js/firebase.js";
+<div class="p-5 border-b border-slate-800">
 
-import { doc,getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+<h2 id="courseTitle" class="text-lg font-bold"></h2>
 
-const params=new URLSearchParams(window.location.search);
+<div class="w-full bg-slate-800 rounded mt-3">
+<div id="progressBar" class="bg-cyan-400 h-2 rounded"></div>
+</div>
 
-const id=params.get("id");
+</div>
 
-const snap=await getDoc(doc(db,"courses",id));
+<div id="moduleList"></div>
 
-document.getElementById("video").src=snap.data().video;
+</div>
 
-</script>
+
+<!-- VIDEO PLAYER -->
+
+<div class="flex-1 flex flex-col">
+
+<div class="flex-1 bg-black">
+
+<iframe
+id="videoPlayer"
+class="w-full h-full"
+allowfullscreen
+></iframe>
+
+</div>
+
+<div class="p-6 bg-slate-900 border-t border-slate-800">
+
+<h3 id="lessonTitle" class="text-xl font-bold"></h3>
+
+<button
+id="markComplete"
+class="mt-4 bg-cyan-500 px-5 py-2 rounded text-black font-bold">
+
+Mark Lesson Complete
+
+</button>
+
+</div>
+
+</div>
+
+<script type="module" src="js/course.js"></script>
 
 </body>
 </html>
+```
