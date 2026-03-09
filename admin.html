@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,7 +7,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Cyber Buddy Admin</title>
+<title>CyberBuddy Admin</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
@@ -18,11 +19,7 @@ background:#0f172a;
 
 .glass{
 background:rgba(30,41,59,0.7);
-backdrop-filter:blur(8px);
-}
-
-.tab{
-transition:opacity .3s ease;
+backdrop-filter:blur(10px);
 }
 
 </style>
@@ -77,7 +74,6 @@ Logout
 </aside>
 
 
-
 <main class="flex-1 p-8 space-y-10 overflow-y-auto">
 
 <!-- DASHBOARD -->
@@ -118,21 +114,16 @@ Logout
 placeholder="Search users..."
 class="bg-gray-800 p-2 rounded mb-4 w-72">
 
-<div class="overflow-x-auto">
-
 <table class="w-full text-sm">
 
 <thead class="border-b border-gray-700">
 
 <tr>
-
 <th class="p-3">Name</th>
 <th class="p-3">Email</th>
-<th class="p-3">Created</th>
 <th class="p-3">Courses</th>
 <th class="p-3">Grant</th>
 <th class="p-3">Actions</th>
-
 </tr>
 
 </thead>
@@ -140,8 +131,6 @@ class="bg-gray-800 p-2 rounded mb-4 w-72">
 <tbody id="usersList"></tbody>
 
 </table>
-
-</div>
 
 </section>
 
@@ -158,8 +147,16 @@ class="bg-gray-800 p-2 rounded mb-4 w-72">
 placeholder="Course Title"
 class="bg-gray-800 p-2 rounded w-full">
 
+<input id="description"
+placeholder="Course Description"
+class="bg-gray-800 p-2 rounded w-full">
+
+<input id="thumbnail"
+placeholder="Thumbnail Image URL"
+class="bg-gray-800 p-2 rounded w-full">
+
 <input id="video"
-placeholder="Video URL"
+placeholder="Course Video URL"
 class="bg-gray-800 p-2 rounded w-full">
 
 <button id="uploadBtn"
@@ -171,13 +168,11 @@ Upload Course
 
 </div>
 
-<div id="coursesList" class="space-y-2"></div>
+<div id="coursesList" class="space-y-3"></div>
 
 </section>
 
 </main>
-
-<!-- Toast Notification -->
 
 <div id="toast"
 class="fixed bottom-5 right-5 bg-cyan-500 text-black px-4 py-2 rounded hidden">
@@ -187,3 +182,4 @@ class="fixed bottom-5 right-5 bg-cyan-500 text-black px-4 py-2 rounded hidden">
 
 </body>
 </html>
+```
