@@ -5,7 +5,8 @@ collection,
 getDocs,
 doc,
 getDoc,
-onSnapshot
+onSnapshot,
+updateDoc
 }
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -17,17 +18,33 @@ sendPasswordResetEmail
 from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
+/* DOM */
+
 const coursesGrid = document.getElementById("coursesGrid");
 const myCoursesGrid = document.getElementById("myCoursesGrid");
 const certList = document.getElementById("certList");
 const invoiceList = document.getElementById("invoiceList");
 
+const logoutBtn = document.getElementById("logoutBtn");
+const resetBtn = document.getElementById("resetBtn");
+
+const editName = document.getElementById("editName");
+const editPhone = document.getElementById("editPhone");
+
+const statCourses = document.getElementById("statCourses");
+const statCertificates = document.getElementById("statCertificates");
+
+const searchInput = document.getElementById("searchCourse");
+
 let userData = null;
+let allCourses = [];
 
 
-/* AUTH CHECK */
+/* ===============================
+   AUTH CHECK
+================================ */
 
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, async (user)=>{
 
 if(!user){
 window.location="login.html";
@@ -36,11 +53,14 @@ return;
 
 const userRef = doc(db,"users",user.uid);
 
-/* realtime listener */
+/* realtime updates */
 
 onSnapshot(userRef,(snap)=>{
 
 userData = snap.data();
+
+editName.value = userData.name || "";
+editPhone.value = userData.phone || "";
 
 loadCourses();
 loadCertificates();
@@ -52,27 +72,56 @@ loadInvoices();
 
 
 
-/* LOAD COURSES */
+/* ===============================
+   LOAD COURSES
+================================ */
 
 async function loadCourses(){
-
-if(!userData) return;
 
 coursesGrid.innerHTML="";
 myCoursesGrid.innerHTML="";
 
 const coursesSnap = await getDocs(collection(db,"courses"));
 
+allCourses = [];
+
 coursesSnap.forEach(course=>{
 
 const data = course.data();
 const courseId = course.id;
 
+allCourses.push({id:courseId,...data});
+
 const access =
 userData.purchasedCourses &&
 userData.purchasedCourses.includes(courseId);
 
-const card = `
+const card = createCourseCard(courseId,data,access);
+
+coursesGrid.innerHTML += card;
+
+if(access){
+myCoursesGrid.innerHTML += card;
+}
+
+});
+
+/* update stats */
+
+statCourses.innerText =
+userData.purchasedCourses ? userData.purchasedCourses.length : 0;
+
+}
+
+
+
+/* ===============================
+   COURSE CARD
+================================ */
+
+function createCourseCard(courseId,data,access){
+
+return `
 
 <div class="glass rounded-xl overflow-hidden border border-slate-800 hover:border-cyan-400 transition">
 
@@ -108,11 +157,36 @@ Locked
 
 `;
 
-coursesGrid.innerHTML += card;
-
-if(access){
-myCoursesGrid.innerHTML += card;
 }
+
+
+
+/* ===============================
+   COURSE SEARCH
+================================ */
+
+if(searchInput){
+
+searchInput.addEventListener("input",()=>{
+
+const query = searchInput.value.toLowerCase();
+
+coursesGrid.innerHTML="";
+
+allCourses.forEach(course=>{
+
+if(course.title.toLowerCase().includes(query)){
+
+const access =
+userData.purchasedCourses &&
+userData.purchasedCourses.includes(course.id);
+
+coursesGrid.innerHTML +=
+createCourseCard(course.id,course,access);
+
+}
+
+});
 
 });
 
@@ -120,11 +194,11 @@ myCoursesGrid.innerHTML += card;
 
 
 
-/* LOAD CERTIFICATES */
+/* ===============================
+   CERTIFICATES
+================================ */
 
 async function loadCertificates(){
-
-if(!certList) return;
 
 certList.innerHTML="Loading certificates...";
 
@@ -138,11 +212,6 @@ const data = await res.json();
 
 const user = auth.currentUser;
 
-if(!data.certificates){
-certList.innerHTML="No certificates available";
-return;
-}
-
 const userCerts = data.certificates.filter(cert =>
 cert.email.toLowerCase() === user.email.toLowerCase()
 );
@@ -150,9 +219,10 @@ cert.email.toLowerCase() === user.email.toLowerCase()
 certList.innerHTML="";
 
 if(userCerts.length===0){
+
 certList.innerHTML="No certificates found";
-return;
-}
+
+}else{
 
 userCerts.forEach(cert=>{
 
@@ -161,15 +231,8 @@ certList.innerHTML += `
 <div class="glass p-5 rounded-xl flex justify-between">
 
 <div>
-
-<h4 class="font-bold text-blue-400">
-${cert.course}
-</h4>
-
-<p class="text-xs text-slate-400">
-${cert.type} • ${cert.duration}
-</p>
-
+<h4 class="font-bold text-blue-400">${cert.course}</h4>
+<p class="text-xs text-slate-400">${cert.type} • ${cert.duration}</p>
 </div>
 
 <a href="certificate.html?id=${cert.certId}"
@@ -183,9 +246,11 @@ View
 
 });
 
-}catch(err){
+}
 
-console.error(err);
+statCertificates.innerText = userCerts.length;
+
+}catch(err){
 
 certList.innerHTML="Failed to load certificates";
 
@@ -195,13 +260,13 @@ certList.innerHTML="Failed to load certificates";
 
 
 
-/* LOAD BILLING */
+/* ===============================
+   BILLING
+================================ */
 
 async function loadInvoices(){
 
-if(!invoiceList) return;
-
-invoiceList.innerHTML="Loading billing records...";
+invoiceList.innerHTML="Loading billing...";
 
 try{
 
@@ -223,9 +288,7 @@ if(userBills.length===0){
 
 invoiceList.innerHTML="No billing history";
 
-return;
-
-}
+}else{
 
 userBills.forEach(bill=>{
 
@@ -234,15 +297,10 @@ invoiceList.innerHTML += `
 <div class="glass p-5 rounded-xl flex justify-between">
 
 <div>
-
-<h4 class="font-bold text-green-400">
-${bill.course}
-</h4>
-
+<h4 class="font-bold text-green-400">${bill.course}</h4>
 <p class="text-xs text-slate-400">
 ₹${bill.amount} • ${bill.date}
 </p>
-
 </div>
 
 <a href="${bill.verifyUrl}"
@@ -257,11 +315,11 @@ Verify
 
 });
 
+}
+
 }catch(err){
 
-console.error(err);
-
-invoiceList.innerHTML="Failed to load billing data";
+invoiceList.innerHTML="Failed to load billing";
 
 }
 
@@ -269,9 +327,30 @@ invoiceList.innerHTML="Failed to load billing data";
 
 
 
-/* PASSWORD RESET */
+/* ===============================
+   PROFILE UPDATE
+================================ */
 
-const resetBtn = document.getElementById("resetBtn");
+document.getElementById("saveProfile").onclick = async()=>{
+
+const user = auth.currentUser;
+
+const ref = doc(db,"users",user.uid);
+
+await updateDoc(ref,{
+name: editName.value,
+phone: editPhone.value
+});
+
+alert("Profile updated");
+
+};
+
+
+
+/* ===============================
+   PASSWORD RESET
+================================ */
 
 if(resetBtn){
 
@@ -289,11 +368,9 @@ alert("Password reset email sent");
 
 
 
-/* LOGOUT */
-
-const logoutBtn = document.getElementById("logoutBtn");
-
-if(logoutBtn){
+/* ===============================
+   LOGOUT
+================================ */
 
 logoutBtn.onclick = async()=>{
 
@@ -303,4 +380,35 @@ window.location="login.html";
 
 };
 
-}
+
+
+/* ===============================
+   SIDEBAR TOGGLE
+================================ */
+
+document.getElementById("toggleSidebar").onclick=()=>{
+
+document.getElementById("sidebar")
+.classList.toggle("collapsed");
+
+};
+
+
+
+/* ===============================
+   TAB SWITCHING
+================================ */
+
+document.querySelectorAll(".navBtn").forEach(btn=>{
+
+btn.onclick = ()=>{
+
+document.querySelectorAll(".tab")
+.forEach(tab=>tab.classList.remove("active"));
+
+document.getElementById(btn.dataset.tab)
+.classList.add("active");
+
+};
+
+});
