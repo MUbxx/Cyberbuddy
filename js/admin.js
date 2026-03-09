@@ -1,3 +1,4 @@
+```javascript
 import { auth, db } from "./firebase.js";
 
 import {
@@ -5,10 +6,10 @@ collection,
 getDocs,
 doc,
 getDoc,
+setDoc,
 updateDoc,
 arrayUnion,
 arrayRemove,
-addDoc,
 deleteDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -26,7 +27,6 @@ const totalCourses=document.getElementById("totalCourses");
 const totalEnrollments=document.getElementById("totalEnrollments");
 
 
-
 function showToast(msg){
 
 const toast=document.getElementById("toast");
@@ -39,7 +39,6 @@ toast.classList.add("hidden");
 },2500);
 
 }
-
 
 
 onAuthStateChanged(auth, async user=>{
@@ -62,7 +61,6 @@ loadDashboard();
 });
 
 
-
 async function loadDashboard(){
 
 usersList.innerHTML="";
@@ -79,15 +77,23 @@ let enrollments=0;
 const courses=[];
 
 coursesSnap.forEach(c=>{
-
-courses.push({id:c.id,...c.data()});
+courses.push(c.id);
 
 coursesList.innerHTML+=`
 
-<div data-course="${c.id}"
-class="flex justify-between bg-gray-800 p-3 rounded">
+<div class="flex justify-between bg-gray-800 p-3 rounded">
 
-<span>${c.data().title}</span>
+<div class="flex items-center gap-3">
+
+<img src="${c.data().thumbnail}"
+class="w-14 h-10 object-cover rounded">
+
+<div>
+<p class="font-bold">${c.id}</p>
+<p class="text-xs text-gray-400">${c.data().description}</p>
+</div>
+
+</div>
 
 <button onclick="deleteCourse('${c.id}')"
 class="bg-red-500 px-2 py-1 text-xs rounded">
@@ -99,30 +105,23 @@ Delete
 </div>
 
 `;
-
 });
 
 
 usersSnap.forEach(user=>{
 
 const data=user.data();
-
 const owned=data.purchasedCourses || [];
 
 enrollments+=owned.length;
 
-const created=data.createdAt?.toDate().toLocaleDateString() || "N/A";
-
 const row=document.createElement("tr");
-row.setAttribute("data-user",user.id);
 
 row.innerHTML=`
 
 <td class="p-3">${data.name}</td>
 
 <td class="p-3">${data.email}</td>
-
-<td class="p-3">${created}</td>
 
 <td class="p-3 text-green-400 text-xs">
 ${owned.join(", ") || "None"}
@@ -134,7 +133,7 @@ ${owned.join(", ") || "None"}
 
 <option value="">Course</option>
 
-${courses.map(c=>`<option value="${c.id}">${c.title}</option>`).join("")}
+${courses.map(c=>`<option value="${c}">${c}</option>`).join("")}
 
 </select>
 
@@ -142,7 +141,7 @@ ${courses.map(c=>`<option value="${c.id}">${c.title}</option>`).join("")}
 
 <td class="p-3">
 
-<button onclick="grant('${user.id}',this)"
+<button onclick="grant('${user.id}')"
 class="bg-cyan-500 text-black px-2 py-1 text-xs rounded">
 
 Grant
@@ -176,43 +175,27 @@ totalEnrollments.innerText=enrollments;
 }
 
 
-
 /* GRANT */
 
-window.grant=async(uid,btn)=>{
+window.grant=async(uid)=>{
 
 const select=document.getElementById(`courseSelect-${uid}`);
 const courseId=select.value;
 
 if(!courseId){
-showToast("Select course first");
+showToast("Select course");
 return;
 }
 
-const userRef=doc(db,"users",uid);
-const snap=await getDoc(userRef);
-
-const owned=snap.data().purchasedCourses || [];
-
-if(owned.includes(courseId)){
-showToast("User already has this course");
-return;
-}
-
-btn.disabled=true;
-btn.innerText="Processing";
-
-await updateDoc(userRef,{
+await updateDoc(doc(db,"users",uid),{
 purchasedCourses:arrayUnion(courseId)
 });
 
-btn.innerText="Granted";
-btn.classList.replace("bg-cyan-500","bg-green-500");
+showToast("Course granted");
 
-showToast("Access granted");
+loadDashboard();
 
 };
-
 
 
 /* REVOKE */
@@ -223,7 +206,7 @@ const select=document.getElementById(`courseSelect-${uid}`);
 const courseId=select.value;
 
 if(!courseId){
-showToast("Select course first");
+showToast("Select course");
 return;
 }
 
@@ -231,10 +214,11 @@ await updateDoc(doc(db,"users",uid),{
 purchasedCourses:arrayRemove(courseId)
 });
 
-showToast("Access revoked");
+showToast("Course revoked");
+
+loadDashboard();
 
 };
-
 
 
 /* DELETE USER */
@@ -245,12 +229,11 @@ if(!confirm("Delete user?")) return;
 
 await deleteDoc(doc(db,"users",uid));
 
-document.querySelector(`[data-user='${uid}']`).remove();
-
 showToast("User removed");
 
-};
+loadDashboard();
 
+};
 
 
 /* DELETE COURSE */
@@ -261,12 +244,11 @@ if(!confirm("Delete course?")) return;
 
 await deleteDoc(doc(db,"courses",id));
 
-document.querySelector(`[data-course='${id}']`).remove();
-
 showToast("Course deleted");
 
-};
+loadDashboard();
 
+};
 
 
 /* UPLOAD COURSE */
@@ -274,16 +256,22 @@ showToast("Course deleted");
 document.getElementById("uploadBtn").onclick=async()=>{
 
 const title=document.getElementById("title").value;
+const description=document.getElementById("description").value;
+const thumbnail=document.getElementById("thumbnail").value;
 const video=document.getElementById("video").value;
 
-if(!title || !video){
+if(!title || !description || !thumbnail || !video){
 showToast("Fill all fields");
 return;
 }
 
-await addDoc(collection(db,"courses"),{
+await setDoc(doc(db,"courses",title),{
+
 title,
+description,
+thumbnail,
 video
+
 });
 
 showToast("Course uploaded");
@@ -291,7 +279,6 @@ showToast("Course uploaded");
 loadDashboard();
 
 };
-
 
 
 /* SEARCH */
@@ -307,7 +294,6 @@ row.style.display=row.innerText.toLowerCase().includes(v)?"":"none";
 });
 
 
-
 /* LOGOUT */
 
 document.getElementById("logoutBtn").onclick=async()=>{
@@ -316,7 +302,6 @@ await signOut(auth);
 window.location="login.html";
 
 };
-
 
 
 /* TABS */
@@ -328,3 +313,4 @@ document.querySelectorAll(".tab").forEach(t=>t.classList.add("hidden"));
 document.getElementById(id).classList.remove("hidden");
 
 };
+```
