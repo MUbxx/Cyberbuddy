@@ -5,20 +5,18 @@ collection,
 getDocs,
 doc,
 getDoc,
-onSnapshot,
-updateDoc
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+setDoc,
+onSnapshot
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
 signOut,
 sendPasswordResetEmail
-}
-from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
-/* DOM ELEMENTS */
+/* DOM */
 
 const coursesGrid = document.getElementById("coursesGrid");
 const myCoursesGrid = document.getElementById("myCoursesGrid");
@@ -43,7 +41,6 @@ const statCertificates = document.getElementById("statCertificates");
 
 const searchInput = document.getElementById("searchCourse");
 
-
 let userData = null;
 let allCourses = [];
 
@@ -57,6 +54,14 @@ onAuthStateChanged(auth, async (user) => {
 if (!user) {
 window.location = "login.html";
 return;
+}
+
+/* load photo instantly from local storage */
+
+const savedPhoto = localStorage.getItem("profilePhoto");
+
+if(savedPhoto){
+profilePhoto.src = savedPhoto;
 }
 
 loadCertificates(user);
@@ -94,6 +99,10 @@ editPhone.value = userData.phone || "";
 
 if(userData.photo){
 profilePhoto.src = userData.photo;
+
+/* save locally */
+
+localStorage.setItem("profilePhoto", userData.photo);
 }
 
 }
@@ -108,7 +117,10 @@ if(photoUpload){
 photoUpload.addEventListener("change", async function(){
 
 const file = this.files[0];
+
 if(!file) return;
+
+/* compress image */
 
 const reader = new FileReader();
 
@@ -116,13 +128,32 @@ reader.onload = async function(){
 
 const base64 = reader.result;
 
+/* preview instantly */
+
 profilePhoto.src = base64;
+
+/* store locally */
+
+localStorage.setItem("profilePhoto", base64);
 
 const user = auth.currentUser;
 
-await updateDoc(doc(db,"users",user.uid),{
-photo: base64
-});
+try{
+
+await setDoc(
+doc(db,"users",user.uid),
+{ photo: base64 },
+{ merge:true }
+);
+
+alert("Profile photo updated");
+
+}catch(err){
+
+console.error(err);
+alert("Failed to upload profile");
+
+}
 
 };
 
@@ -140,17 +171,17 @@ UPDATE PHONE NUMBER
 document.getElementById("saveProfile").onclick = async () => {
 
 const phone = editPhone.value;
-
 const user = auth.currentUser;
 
-await updateDoc(doc(db,"users",user.uid),{
-phone: phone
-});
+await setDoc(
+doc(db,"users",user.uid),
+{ phone: phone },
+{ merge:true }
+);
 
 alert("Profile updated");
 
 };
-
 
 
 /* ==========================
@@ -199,6 +230,7 @@ function createCourseCard(courseId,data,access){
 const img = data.image || data.thumbnail || "https://via.placeholder.com/400x200";
 
 return `
+
 <div class="glass rounded-xl overflow-hidden border border-slate-800 hover:border-cyan-400 transition">
 
 <img src="${img}" class="w-full h-40 object-cover">
@@ -225,10 +257,10 @@ Locked
 
 </div>
 </div>
+
 `;
 
 }
-
 
 
 /* ==========================
@@ -260,7 +292,6 @@ coursesGrid.innerHTML += createCourseCard(course.id,course,access);
 }
 
 
-
 /* ==========================
 CERTIFICATES
 ========================== */
@@ -268,6 +299,8 @@ CERTIFICATES
 async function loadCertificates(user){
 
 if(!certList) return;
+
+try{
 
 const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json");
 
@@ -301,8 +334,11 @@ View
 
 statCertificates.innerText = userCerts.length;
 
+}catch(e){
+console.error(e);
 }
 
+}
 
 
 /* ==========================
@@ -312,6 +348,8 @@ BILLING
 async function loadInvoices(user){
 
 if(!invoiceList) return;
+
+try{
 
 const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json");
 
@@ -343,8 +381,11 @@ Verify
 
 });
 
+}catch(e){
+console.error(e);
 }
 
+}
 
 
 /* ==========================
@@ -364,7 +405,6 @@ alert("Password reset email sent");
 };
 
 }
-
 
 
 /* ==========================
