@@ -19,12 +19,14 @@ onAuthStateChanged,
 sendPasswordResetEmail
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-const usersList=document.getElementById("usersList");
-const coursesList=document.getElementById("coursesList");
 
-const totalUsers=document.getElementById("totalUsers");
-const totalCourses=document.getElementById("totalCourses");
-const totalEnrollments=document.getElementById("totalEnrollments");
+const usersList = document.getElementById("usersList");
+const coursesList = document.getElementById("coursesList");
+
+const totalUsers = document.getElementById("totalUsers");
+const totalCourses = document.getElementById("totalCourses");
+const totalEnrollments = document.getElementById("totalEnrollments");
+
 
 function toast(msg){
 const t=document.getElementById("toast");
@@ -32,6 +34,7 @@ t.innerText=msg;
 t.classList.remove("hidden");
 setTimeout(()=>t.classList.add("hidden"),2000);
 }
+
 
 
 onAuthStateChanged(auth,async(user)=>{
@@ -87,7 +90,8 @@ coursesList.innerHTML+=`
 <p class="text-xs text-gray-400">${c.data().description}</p>
 </div>
 
-<button onclick="deleteCourse('${c.id}')" class="bg-red-500 px-2 py-1 text-xs rounded">
+<button onclick="deleteCourse('${c.id}')" 
+class="bg-red-500 px-2 py-1 text-xs rounded">
 Delete
 </button>
 
@@ -96,7 +100,8 @@ Delete
 <input id="module-${c.id}" placeholder="Module Name"
 class="bg-gray-900 p-2 rounded w-full">
 
-<button onclick="addModule('${c.id}')" class="bg-green-500 px-3 py-1 text-black rounded text-xs">
+<button onclick="addModule('${c.id}')"
+class="bg-green-500 px-3 py-1 text-black rounded text-xs">
 Add Module
 </button>
 
@@ -111,7 +116,7 @@ loadModules(c.id);
 
 
 
-/* LOAD USERS */
+/* USERS */
 
 users.forEach(u=>{
 
@@ -145,9 +150,11 @@ ${courseNames.map(c=>`<option value="${c}">${c}</option>`).join("")}
 
 <td class="p-3">
 
-<input id="name-${u.id}" value="${d.name}" class="bg-gray-900 p-1 text-xs w-32">
+<input id="name-${u.id}" value="${d.name}"
+class="bg-gray-900 p-1 text-xs w-32">
 
-<button onclick="updateUserName('${u.id}')" class="bg-blue-500 px-2 py-1 text-xs rounded ml-1">
+<button onclick="updateUserName('${u.id}')"
+class="bg-blue-500 px-2 py-1 text-xs rounded ml-1">
 Save
 </button>
 
@@ -155,15 +162,18 @@ Save
 
 <td class="p-3">
 
-<button onclick="grant('${u.id}')" class="bg-cyan-500 px-2 py-1 text-xs rounded">
+<button onclick="grant('${u.id}')"
+class="bg-cyan-500 px-2 py-1 text-xs rounded">
 Grant
 </button>
 
-<button onclick="revoke('${u.id}')" class="bg-yellow-500 px-2 py-1 text-xs rounded ml-2">
+<button onclick="revoke('${u.id}')"
+class="bg-yellow-500 px-2 py-1 text-xs rounded ml-2">
 Revoke
 </button>
 
-<button onclick="deleteUser('${u.id}')" class="bg-red-500 px-2 py-1 text-xs rounded ml-2">
+<button onclick="deleteUser('${u.id}')"
+class="bg-red-500 px-2 py-1 text-xs rounded ml-2">
 Delete
 </button>
 
@@ -188,6 +198,11 @@ const title=document.getElementById("courseTitle").value;
 const description=document.getElementById("courseDescription").value;
 const image=document.getElementById("courseImage").value;
 
+if(!title || !description || !image){
+toast("Fill all fields");
+return;
+}
+
 await setDoc(doc(db,"courses",title),{
 title,
 description,
@@ -202,13 +217,18 @@ loadDashboard();
 
 
 
-/* ADD MODULE */
+/* ADD MODULE (FIXED) */
 
 window.addModule=async(courseId)=>{
 
 const name=document.getElementById(`module-${courseId}`).value;
 
-await setDoc(doc(db,"courses",courseId,"modules",name),{
+if(!name){
+toast("Enter module name");
+return;
+}
+
+await addDoc(collection(db,"courses",courseId,"modules"),{
 title:name
 });
 
@@ -219,6 +239,8 @@ loadModules(courseId);
 };
 
 
+
+/* LOAD MODULES */
 
 async function loadModules(courseId){
 
@@ -236,19 +258,20 @@ container.innerHTML+=`
 
 <div class="flex justify-between">
 
-<p class="text-sm font-bold">${m.id}</p>
+<p class="text-sm font-bold">${m.data().title}</p>
 
-<button onclick="deleteModule('${courseId}','${m.id}')" class="text-red-400 text-xs">
+<button onclick="deleteModule('${courseId}','${m.id}')"
+class="text-red-400 text-xs">
 Delete
 </button>
 
 </div>
 
-<input id="lesson-title-${courseId}-${m.id}"
+<input id="lesson-title-${m.id}"
 placeholder="Lesson Title"
 class="bg-gray-800 p-1 rounded w-full text-xs">
 
-<input id="lesson-video-${courseId}-${m.id}"
+<input id="lesson-video-${m.id}"
 placeholder="Video URL"
 class="bg-gray-800 p-1 rounded w-full text-xs">
 
@@ -270,8 +293,13 @@ Add Lesson
 
 window.addLesson=async(course,module)=>{
 
-const title=document.getElementById(`lesson-title-${course}-${module}`).value;
-const video=document.getElementById(`lesson-video-${course}-${module}`).value;
+const title=document.getElementById(`lesson-title-${module}`).value;
+const video=document.getElementById(`lesson-video-${module}`).value;
+
+if(!title || !video){
+toast("Fill lesson fields");
+return;
+}
 
 await addDoc(collection(db,"courses",course,"modules",module,"lessons"),{
 title,
@@ -287,6 +315,8 @@ toast("Lesson added");
 /* DELETE MODULE */
 
 window.deleteModule=async(course,module)=>{
+
+if(!confirm("Delete module?")) return;
 
 await deleteDoc(doc(db,"courses",course,"modules",module));
 
@@ -346,6 +376,8 @@ toast("Course revoked");
 
 window.deleteUser=async(uid)=>{
 
+if(!confirm("Delete user?")) return;
+
 await deleteDoc(doc(db,"users",uid));
 
 toast("User deleted");
@@ -357,6 +389,8 @@ loadDashboard();
 
 
 window.deleteCourse=async(id)=>{
+
+if(!confirm("Delete course?")) return;
 
 await deleteDoc(doc(db,"courses",id));
 
@@ -373,6 +407,11 @@ loadDashboard();
 document.getElementById("resetPassword").onclick=async()=>{
 
 const email=document.getElementById("resetEmail").value;
+
+if(!email){
+toast("Enter email");
+return;
+}
 
 await sendPasswordResetEmail(auth,email);
 
