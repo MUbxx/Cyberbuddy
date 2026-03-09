@@ -29,6 +29,11 @@ const resetBtn = document.getElementById("resetBtn");
 
 const editName = document.getElementById("editName");
 const editPhone = document.getElementById("editPhone");
+const editPhoto = document.getElementById("editPhoto");
+
+const profileNameDisplay = document.getElementById("profileNameDisplay");
+const profileEmailDisplay = document.getElementById("profileEmailDisplay");
+const profilePhoto = document.getElementById("profilePhoto");
 
 const statCourses = document.getElementById("statCourses");
 const statCertificates = document.getElementById("statCertificates");
@@ -48,6 +53,11 @@ onAuthStateChanged(auth, async (user) => {
         return;
     }
 
+    // NEW: Push the email to the Profile section immediately
+    if (profileEmailDisplay) {
+        profileEmailDisplay.innerText = user.email;
+    }
+
     // Load external data once on login to prevent redundant network calls
     loadCertificates(user);
     loadInvoices(user);
@@ -60,6 +70,12 @@ onAuthStateChanged(auth, async (user) => {
         if (userData) {
             editName.value = userData.name || "";
             editPhone.value = userData.phone || "";
+            editPhoto.value = userData.photoURL || "";
+            
+            // Update profile card display
+            if (profileNameDisplay) profileNameDisplay.innerText = userData.name || "Student";
+            if (profilePhoto && userData.photoURL) profilePhoto.src = userData.photoURL;
+            
             loadCourses();
         }
     });
@@ -141,7 +157,6 @@ async function loadCertificates(user) {
         const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json");
         const data = await res.json();
 
-        // Filters by email and handles potential whitespace or case issues
         const userCerts = data.certificates.filter(cert => {
             return cert.email && cert.email.toLowerCase().trim() === user.email.toLowerCase().trim();
         });
@@ -215,11 +230,18 @@ async function loadInvoices(user) {
 document.getElementById("saveProfile").onclick = async () => {
     const user = auth.currentUser;
     const ref = doc(db, "users", user.uid);
-    await updateDoc(ref, {
-        name: editName.value,
-        phone: editPhone.value
-    });
-    alert("Profile updated");
+    
+    try {
+        await updateDoc(ref, {
+            name: editName.value,
+            phone: editPhone.value,
+            photoURL: editPhoto.value
+        });
+        alert("Profile updated");
+    } catch (error) {
+        console.error("Update Error:", error);
+        alert("Failed to update profile");
+    }
 };
 
 
@@ -259,5 +281,9 @@ document.querySelectorAll(".navBtn").forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
         document.getElementById(btn.dataset.tab).classList.add("active");
+        
+        // Update header title based on button text
+        const viewTitle = document.getElementById("viewTitle");
+        if (viewTitle) viewTitle.innerText = btn.querySelector('span').innerText;
     };
 });
