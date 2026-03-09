@@ -9,14 +9,17 @@ setDoc,
 updateDoc,
 deleteDoc,
 arrayUnion,
-arrayRemove
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+arrayRemove,
+addDoc
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 signOut,
 onAuthStateChanged,
 sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
 const usersList=document.getElementById("usersList");
@@ -69,10 +72,11 @@ totalUsers.innerText=users.size;
 totalCourses.innerText=courses.size;
 
 let enrollments=0;
-
 const courseNames=[];
 
 
+
+/* LIST COURSES */
 
 courses.forEach(c=>{
 
@@ -80,8 +84,9 @@ courseNames.push(c.id);
 
 coursesList.innerHTML+=`
 
-<div class="glass p-3 rounded flex justify-between">
+<div class="glass p-4 rounded space-y-3">
 
+<div class="flex justify-between">
 <div>
 <p class="font-bold">${c.data().title}</p>
 <p class="text-xs text-gray-400">${c.data().description}</p>
@@ -91,14 +96,28 @@ coursesList.innerHTML+=`
 class="bg-red-500 px-2 py-1 text-xs rounded">
 Delete
 </button>
-
 </div>
 
+<input id="module-${c.id}" placeholder="New Module Name"
+class="bg-gray-900 p-2 rounded w-full">
+
+<button onclick="addModule('${c.id}')"
+class="bg-green-500 px-3 py-1 text-black rounded text-xs">
+Add Module
+</button>
+
+<div id="modules-${c.id}" class="space-y-2"></div>
+
+</div>
 `;
+
+loadModules(c.id);
 
 });
 
 
+
+/* USERS */
 
 users.forEach(u=>{
 
@@ -172,16 +191,145 @@ totalEnrollments.innerText=enrollments;
 
 
 
-/* UPDATE USER NAME */
+/* CREATE COURSE */
+
+document.getElementById("createCourse").onclick=async()=>{
+
+const title=document.getElementById("courseTitle").value;
+const description=document.getElementById("courseDescription").value;
+const image=document.getElementById("courseImage").value;
+
+if(!title || !description || !image){
+toast("Fill all fields");
+return;
+}
+
+await setDoc(doc(db,"courses",title),{
+title,
+description,
+image
+});
+
+toast("Course created");
+
+loadDashboard();
+
+};
+
+
+
+/* ADD MODULE */
+
+window.addModule=async(courseId)=>{
+
+const name=document.getElementById(`module-${courseId}`).value;
+
+if(!name){
+toast("Enter module name");
+return;
+}
+
+await setDoc(doc(db,"courses",courseId,"modules",name),{
+title:name
+});
+
+toast("Module added");
+
+loadModules(courseId);
+
+};
+
+
+
+async function loadModules(courseId){
+
+const container=document.getElementById(`modules-${courseId}`);
+
+container.innerHTML="";
+
+const mods=await getDocs(collection(db,"courses",courseId,"modules"));
+
+mods.forEach(m=>{
+
+container.innerHTML+=`
+
+<div class="bg-slate-900 p-3 rounded space-y-2">
+
+<div class="flex justify-between">
+
+<p class="text-sm font-bold">${m.id}</p>
+
+<button onclick="deleteModule('${courseId}','${m.id}')"
+class="text-red-400 text-xs">Delete</button>
+
+</div>
+
+<input id="lesson-title-${courseId}-${m.id}"
+placeholder="Lesson Title"
+class="bg-gray-800 p-1 rounded w-full text-xs">
+
+<input id="lesson-video-${courseId}-${m.id}"
+placeholder="Video URL"
+class="bg-gray-800 p-1 rounded w-full text-xs">
+
+<button onclick="addLesson('${courseId}','${m.id}')"
+class="bg-cyan-500 px-2 py-1 text-xs rounded text-black">
+Add Lesson
+</button>
+
+</div>
+`;
+
+});
+
+}
+
+
+
+/* ADD LESSON */
+
+window.addLesson=async(course,module)=>{
+
+const title=document.getElementById(`lesson-title-${course}-${module}`).value;
+const video=document.getElementById(`lesson-video-${course}-${module}`).value;
+
+if(!title || !video){
+toast("Fill lesson fields");
+return;
+}
+
+await addDoc(collection(db,"courses",course,"modules",module,"lessons"),{
+title,
+video
+});
+
+toast("Lesson added");
+
+};
+
+
+
+/* DELETE MODULE */
+
+window.deleteModule=async(course,module)=>{
+
+if(!confirm("Delete module?")) return;
+
+await deleteDoc(doc(db,"courses",course,"modules",module));
+
+toast("Module deleted");
+
+loadModules(course);
+
+};
+
+
+
+/* USER NAME UPDATE */
 
 window.updateUserName=async(uid)=>{
 
 const newName=document.getElementById(`name-${uid}`).value;
-
-if(!newName){
-toast("Enter name");
-return;
-}
 
 await updateDoc(doc(db,"users",uid),{
 name:newName
@@ -195,24 +343,17 @@ loadDashboard();
 
 
 
-/* GRANT */
+/* GRANT COURSE */
 
 window.grant=async(uid)=>{
 
 const course=document.getElementById(`course-${uid}`).value;
-
-if(!course){
-toast("Select course");
-return;
-}
 
 await updateDoc(doc(db,"users",uid),{
 purchasedCourses:arrayUnion(course)
 });
 
 toast("Course granted");
-
-loadDashboard();
 
 };
 
@@ -224,16 +365,25 @@ window.revoke=async(uid)=>{
 
 const course=document.getElementById(`course-${uid}`).value;
 
-if(!course){
-toast("Select course");
-return;
-}
-
 await updateDoc(doc(db,"users",uid),{
 purchasedCourses:arrayRemove(course)
 });
 
 toast("Course revoked");
+
+};
+
+
+
+/* DELETE COURSE */
+
+window.deleteCourse=async(id)=>{
+
+if(!confirm("Delete course?")) return;
+
+await deleteDoc(doc(db,"courses",id));
+
+toast("Course deleted");
 
 loadDashboard();
 
@@ -257,81 +407,17 @@ loadDashboard();
 
 
 
-/* DELETE COURSE */
-
-window.deleteCourse=async(id)=>{
-
-if(!confirm("Delete course?")) return;
-
-await deleteDoc(doc(db,"courses",id));
-
-toast("Course deleted");
-
-loadDashboard();
-
-};
-
-
-
-/* UPLOAD COURSE */
-
-document.getElementById("uploadBtn").onclick=async()=>{
-
-const title=document.getElementById("title").value;
-const description=document.getElementById("description").value;
-const image=document.getElementById("image").value;
-const video=document.getElementById("video").value;
-
-if(!title || !description || !image || !video){
-toast("Fill all fields");
-return;
-}
-
-await setDoc(doc(db,"courses",title),{
-title,
-description,
-image,
-video
-});
-
-toast("Course uploaded");
-
-loadDashboard();
-
-};
-
-
-
 /* PASSWORD RESET */
 
 document.getElementById("resetPassword").onclick=async()=>{
 
 const email=document.getElementById("resetEmail").value;
 
-if(!email){
-toast("Enter email");
-return;
-}
-
 await sendPasswordResetEmail(auth,email);
 
 toast("Reset email sent");
 
 };
-
-
-
-/* USER SEARCH */
-
-document.getElementById("userSearch").addEventListener("input",function(){
-
-const q=this.value.toLowerCase();
-
-document.querySelectorAll("#usersList tr").forEach(r=>{
-r.style.display=r.innerText.toLowerCase().includes(q)?"":"none";
-});
-
-});
 
 
 
@@ -347,10 +433,8 @@ window.location="login.html";
 /* TABS */
 
 document.querySelectorAll(".navBtn").forEach(btn=>{
-
 btn.onclick=()=>{
 document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
 document.getElementById(btn.dataset.tab).classList.add("active");
 };
-
 });
