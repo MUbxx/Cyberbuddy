@@ -41,7 +41,7 @@ let allCourses = [];
 
 
 /* ===============================
-   AUTH CHECK
+   AUTH CHECK
 ================================ */
 
 onAuthStateChanged(auth, async (user)=>{
@@ -50,6 +50,10 @@ if(!user){
 window.location="login.html";
 return;
 }
+
+// FIX: Load external data once on login to avoid redundant fetching
+loadCertificates(user);
+loadInvoices(user);
 
 const userRef = doc(db,"users",user.uid);
 
@@ -63,8 +67,8 @@ editName.value = userData.name || "";
 editPhone.value = userData.phone || "";
 
 loadCourses();
-loadCertificates();
-loadInvoices();
+// Removed loadCertificates and loadInvoices from here 
+// to prevent re-fetching every time profile is saved.
 
 });
 
@@ -73,7 +77,7 @@ loadInvoices();
 
 
 /* ===============================
-   LOAD COURSES
+   LOAD COURSES
 ================================ */
 
 async function loadCourses(){
@@ -116,7 +120,7 @@ userData.purchasedCourses ? userData.purchasedCourses.length : 0;
 
 
 /* ===============================
-   COURSE CARD
+   COURSE CARD
 ================================ */
 
 function createCourseCard(courseId,data,access){
@@ -162,7 +166,7 @@ Locked
 
 
 /* ===============================
-   COURSE SEARCH
+   COURSE SEARCH
 ================================ */
 
 if(searchInput){
@@ -195,10 +199,10 @@ createCourseCard(course.id,course,access);
 
 
 /* ===============================
-   CERTIFICATES
+   CERTIFICATES
 ================================ */
 
-async function loadCertificates(){
+async function loadCertificates(user){ // Passed user as argument
 
 certList.innerHTML="Loading certificates...";
 
@@ -210,10 +214,9 @@ const res = await fetch(
 
 const data = await res.json();
 
-const user = auth.currentUser;
-
+// FIX: Added safety check for email existence before toLowerCase()
 const userCerts = data.certificates.filter(cert =>
-cert.email.toLowerCase() === user.email.toLowerCase()
+cert.email && user.email && cert.email.toLowerCase() === user.email.toLowerCase()
 );
 
 certList.innerHTML="";
@@ -261,10 +264,10 @@ certList.innerHTML="Failed to load certificates";
 
 
 /* ===============================
-   BILLING
+   BILLING
 ================================ */
 
-async function loadInvoices(){
+async function loadInvoices(user){ // Passed user as argument
 
 invoiceList.innerHTML="Loading billing...";
 
@@ -276,10 +279,9 @@ const res = await fetch(
 
 const bills = await res.json();
 
-const user = auth.currentUser;
-
+// FIX: Added safety check for email existence
 const userBills = bills.filter(bill =>
-bill.email.toLowerCase() === user.email.toLowerCase()
+bill.email && user.email && bill.email.toLowerCase() === user.email.toLowerCase()
 );
 
 invoiceList.innerHTML="";
@@ -328,7 +330,7 @@ invoiceList.innerHTML="Failed to load billing";
 
 
 /* ===============================
-   PROFILE UPDATE
+   PROFILE UPDATE
 ================================ */
 
 document.getElementById("saveProfile").onclick = async()=>{
@@ -349,7 +351,7 @@ alert("Profile updated");
 
 
 /* ===============================
-   PASSWORD RESET
+   PASSWORD RESET
 ================================ */
 
 if(resetBtn){
@@ -369,7 +371,7 @@ alert("Password reset email sent");
 
 
 /* ===============================
-   LOGOUT
+   LOGOUT
 ================================ */
 
 logoutBtn.onclick = async()=>{
@@ -383,7 +385,7 @@ window.location="login.html";
 
 
 /* ===============================
-   SIDEBAR TOGGLE
+   SIDEBAR TOGGLE
 ================================ */
 
 document.getElementById("toggleSidebar").onclick=()=>{
@@ -396,7 +398,7 @@ document.getElementById("sidebar")
 
 
 /* ===============================
-   TAB SWITCHING
+   TAB SWITCHING
 ================================ */
 
 document.querySelectorAll(".navBtn").forEach(btn=>{
