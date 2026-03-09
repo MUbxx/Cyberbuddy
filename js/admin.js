@@ -72,14 +72,18 @@ let enrollments=0;
 
 const courseNames=[];
 
+
+
 courses.forEach(c=>{
+
 courseNames.push(c.id);
 
 coursesList.innerHTML+=`
+
 <div class="glass p-3 rounded flex justify-between">
 
 <div>
-<p class="font-bold">${c.id}</p>
+<p class="font-bold">${c.data().title}</p>
 <p class="text-xs text-gray-400">${c.data().description}</p>
 </div>
 
@@ -89,9 +93,11 @@ Delete
 </button>
 
 </div>
+
 `;
 
 });
+
 
 
 users.forEach(u=>{
@@ -127,6 +133,17 @@ ${courseNames.map(c=>`<option value="${c}">${c}</option>`).join("")}
 
 <td class="p-3">
 
+<input id="name-${u.id}" value="${d.name}" class="bg-gray-900 p-1 text-xs w-32">
+
+<button onclick="updateUserName('${u.id}')"
+class="bg-blue-500 px-2 py-1 text-xs rounded ml-1">
+Save
+</button>
+
+</td>
+
+<td class="p-3">
+
 <button onclick="grant('${u.id}')"
 class="bg-cyan-500 px-2 py-1 text-xs rounded">
 Grant
@@ -152,6 +169,29 @@ usersList.appendChild(tr);
 totalEnrollments.innerText=enrollments;
 
 }
+
+
+
+/* UPDATE USER NAME */
+
+window.updateUserName=async(uid)=>{
+
+const newName=document.getElementById(`name-${uid}`).value;
+
+if(!newName){
+toast("Enter name");
+return;
+}
+
+await updateDoc(doc(db,"users",uid),{
+name:newName
+});
+
+toast("Name updated");
+
+loadDashboard();
+
+};
 
 
 
@@ -314,4 +354,3 @@ document.getElementById(btn.dataset.tab).classList.add("active");
 };
 
 });
-
