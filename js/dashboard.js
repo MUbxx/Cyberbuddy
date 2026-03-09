@@ -145,7 +145,7 @@ ${data.description || ""}
 ${
 access
 ?
-`<a href="course.html?id=${courseId}"
+`<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${courseId}"
 class="bg-cyan-400 text-black px-4 py-2 rounded-lg text-sm font-bold">
 Start Learning
 </a>`
@@ -364,4 +364,5 @@ document.getElementById(btn.dataset.tab)
 };
 
 });
+
 
