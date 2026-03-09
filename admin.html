@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
@@ -59,13 +60,16 @@ Logout
 </aside>
 
 
+
 <main class="flex-1 p-10 space-y-10 overflow-y-auto">
+
+<!-- DASHBOARD -->
 
 <section id="dashboard" class="tab active">
 
-<h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+<h2 class="text-2xl font-bold mb-6">Dashboard Overview</h2>
 
-<div class="grid grid-cols-3 gap-6">
+<div class="grid grid-cols-4 gap-6">
 
 <div class="glass p-6 rounded">
 <p>Total Users</p>
@@ -82,11 +86,18 @@ Logout
 <h3 id="totalEnrollments" class="text-3xl font-bold">0</h3>
 </div>
 
+<div class="glass p-6 rounded">
+<p>Active Courses</p>
+<h3 id="activeCourses" class="text-3xl font-bold">0</h3>
+</div>
+
 </div>
 
 </section>
 
 
+
+<!-- USERS -->
 
 <section id="users" class="tab">
 
@@ -121,37 +132,46 @@ class="bg-gray-800 p-2 rounded mb-4 w-72">
 
 
 
+<!-- COURSES -->
+
 <section id="courses" class="tab">
 
-<h2 class="text-xl font-bold mb-6">Course Builder</h2>
+<h2 class="text-xl font-bold mb-6">Course Manager</h2>
 
 <div class="glass p-6 rounded mb-6 space-y-3">
 
-<input id="courseTitle" placeholder="Course Title" class="bg-gray-800 p-2 rounded w-full">
+<input id="title" placeholder="Course Title" class="bg-gray-800 p-2 rounded w-full">
 
-<input id="courseDescription" placeholder="Course Description" class="bg-gray-800 p-2 rounded w-full">
+<input id="description" placeholder="Course Description" class="bg-gray-800 p-2 rounded w-full">
 
-<input id="courseImage" placeholder="Thumbnail URL" class="bg-gray-800 p-2 rounded w-full">
+<input id="image" placeholder="Thumbnail URL" class="bg-gray-800 p-2 rounded w-full">
 
-<button id="createCourse" class="bg-cyan-500 px-4 py-2 text-black rounded">
-Create Course
+<input id="video" placeholder="Video URL" class="bg-gray-800 p-2 rounded w-full">
+
+<button id="uploadBtn" class="bg-cyan-500 px-4 py-2 text-black rounded">
+Upload Course
 </button>
 
 </div>
 
-<div id="coursesList" class="space-y-6"></div>
+<div id="coursesList" class="space-y-3"></div>
 
 </section>
 
 
 
+<!-- SECURITY -->
+
 <section id="security" class="tab">
 
 <h2 class="text-xl font-bold mb-6">Security</h2>
 
-<input id="resetEmail" placeholder="User Email" class="bg-gray-800 p-2 rounded mb-4 w-80">
+<input id="resetEmail"
+placeholder="User Email"
+class="bg-gray-800 p-2 rounded mb-4 w-80">
 
-<button id="resetPassword" class="bg-yellow-500 px-4 py-2 text-black rounded">
+<button id="resetPassword"
+class="bg-yellow-500 px-4 py-2 text-black rounded">
 Send Password Reset
 </button>
 
