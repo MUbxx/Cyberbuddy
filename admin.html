@@ -11,70 +11,37 @@
         .glass { background:rgba(30, 41, 59, 0.7); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.05); }
         .tab { display:none; }
         .tab.active { display:block; }
-        .nav-active { background: rgba(34, 211, 238, 0.1); border-left: 4px solid #22d3ee; }
     </style>
 </head>
-
 <body class="flex min-h-screen">
 
     <aside class="w-64 glass p-6 flex flex-col sticky top-0 h-screen">
         <h1 class="text-2xl font-black text-cyan-400 mb-10">CYBER<span class="text-white">BUDDY</span></h1>
-        
         <nav class="flex-1 space-y-2">
-            <button class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="dashboard">
-                <i class="fas fa-chart-line mr-2"></i> Dashboard
-            </button>
-            <button class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="users">
-                <i class="fas fa-users mr-2"></i> Users
-            </button>
-            <button class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="courses">
-                <i class="fas fa-layer-group mr-2"></i> Course Builder
-            </button>
-            <button class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="security">
-                <i class="fas fa-user-shield mr-2"></i> Security
-            </button>
+            <button onclick="window.showTab('dashboard')" class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="dashboard">Dashboard</button>
+            <button onclick="window.showTab('users')" class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="users">Users</button>
+            <button onclick="window.showTab('courses')" class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="courses">Courses</button>
+            <button onclick="window.showTab('security')" class="navBtn w-full text-left p-3 hover:bg-slate-800 rounded transition" data-tab="security">Security</button>
         </nav>
-
-        <button id="logoutBtn" class="bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500 hover:text-white w-full py-2 rounded mt-10 transition font-bold">
-            Logout
-        </button>
+        <button id="logoutBtn" class="bg-red-500 hover:bg-red-600 w-full py-2 rounded mt-10 transition font-bold">Logout</button>
     </aside>
 
     <main class="flex-1 p-10 space-y-10 overflow-y-auto">
         <section id="dashboard" class="tab active">
-            <h2 class="text-3xl font-bold mb-8">Admin Overview</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass p-8 rounded-xl border-b-4 border-cyan-500">
-                    <p class="text-slate-400 text-sm uppercase font-bold">Total Users</p>
-                    <h3 id="totalUsers" class="text-4xl font-black mt-2">0</h3>
-                </div>
-                <div class="glass p-8 rounded-xl border-b-4 border-blue-500">
-                    <p class="text-slate-400 text-sm uppercase font-bold">Total Courses</p>
-                    <h3 id="totalCourses" class="text-4xl font-black mt-2">0</h3>
-                </div>
-                <div class="glass p-8 rounded-xl border-b-4 border-green-500">
-                    <p class="text-slate-400 text-sm uppercase font-bold">Total Enrollments</p>
-                    <h3 id="totalEnrollments" class="text-4xl font-black mt-2">0</h3>
-                </div>
+            <h2 class="text-2xl font-bold mb-6">Dashboard Overview</h2>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="glass p-6 rounded"> <p class="text-xs text-gray-400">Total Users</p> <h3 id="totalUsers" class="text-3xl font-bold">0</h3> </div>
+                <div class="glass p-6 rounded"> <p class="text-xs text-gray-400">Total Courses</p> <h3 id="totalCourses" class="text-3xl font-bold">0</h3> </div>
+                <div class="glass p-6 rounded"> <p class="text-xs text-gray-400">Enrollments</p> <h3 id="totalEnrollments" class="text-3xl font-bold">0</h3> </div>
             </div>
         </section>
 
         <section id="users" class="tab">
-            <h2 class="text-2xl font-bold mb-6">User Management</h2>
-            <div class="glass p-4 rounded-xl mb-6">
-                <input id="userSearch" placeholder="Search by name or email..." class="bg-slate-900 border border-slate-700 p-2 rounded w-full md:w-80 outline-none focus:border-cyan-400">
-            </div>
-            <div class="glass rounded-xl overflow-hidden">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-slate-800/50 text-slate-400 uppercase text-xs">
-                        <tr>
-                            <th class="p-4">Name</th>
-                            <th class="p-4">Email</th>
-                            <th class="p-4">Access</th>
-                            <th class="p-4">Grant Course</th>
-                            <th class="p-4">Rename Student</th>
-                            <th class="p-4">Actions</th>
-                        </tr>
+            <h2 class="text-xl font-bold mb-4">User Management</h2>
+            <div class="glass overflow-x-auto rounded-xl">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-800/50 text-gray-400 text-xs">
+                        <tr> <th class="p-3">Name</th> <th class="p-3">Email</th> <th class="p-3">Courses</th> <th class="p-3">Grant</th> <th class="p-3">Rename</th> <th class="p-3">Actions</th> </tr>
                     </thead>
                     <tbody id="usersList"></tbody>
                 </table>
@@ -82,36 +49,26 @@
         </section>
 
         <section id="courses" class="tab">
-            <h2 class="text-2xl font-bold mb-6">Course Architect</h2>
-            <div class="glass p-6 rounded-xl mb-8 space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input id="courseTitle" placeholder="Course Title (Internal ID)" class="bg-slate-900 border border-slate-700 p-3 rounded-lg outline-none focus:border-cyan-400">
-                    <input id="courseImage" placeholder="Thumbnail Image URL" class="bg-slate-900 border border-slate-700 p-3 rounded-lg outline-none focus:border-cyan-400">
-                    <textarea id="courseDescription" placeholder="Course Description" class="md:col-span-2 bg-slate-900 border border-slate-700 p-3 rounded-lg outline-none focus:border-cyan-400"></textarea>
-                </div>
-                <button id="createCourse" class="bg-cyan-500 hover:bg-cyan-400 px-8 py-3 text-black font-bold rounded-lg transition">
-                    Initialize Course
-                </button>
+            <h2 class="text-xl font-bold mb-6">Course Builder</h2>
+            <div class="glass p-6 rounded mb-8 space-y-3">
+                <input id="courseTitle" placeholder="Course Title" class="bg-gray-800 p-2 rounded w-full">
+                <input id="courseDescription" placeholder="Description" class="bg-gray-800 p-2 rounded w-full">
+                <input id="courseImage" placeholder="Thumbnail URL" class="bg-gray-800 p-2 rounded w-full">
+                <button id="createCourse" class="bg-cyan-500 text-black px-4 py-2 rounded font-bold">Create Course</button>
             </div>
-            <div id="coursesList" class="grid grid-cols-1 gap-6"></div>
+            <div id="coursesList" class="space-y-4"></div>
         </section>
 
         <section id="security" class="tab">
-            <div class="glass p-10 rounded-xl max-w-2xl">
-                <h2 class="text-2xl font-bold mb-4">Account Recovery</h2>
-                <p class="text-slate-400 mb-6">Send a password reset link to a student's email address.</p>
-                <div class="flex flex-col md:flex-row gap-4">
-                    <input id="resetEmail" placeholder="student@example.com" class="flex-1 bg-slate-900 border border-slate-700 p-3 rounded-lg outline-none focus:border-cyan-400">
-                    <button id="resetPassword" class="bg-yellow-500 hover:bg-yellow-400 px-6 py-3 text-black font-bold rounded-lg transition">
-                        Send Reset Link
-                    </button>
-                </div>
+            <h2 class="text-xl font-bold mb-6">Security Settings</h2>
+            <div class="glass p-6 rounded max-w-md">
+                <input id="resetEmail" placeholder="User Email" class="bg-gray-800 p-2 rounded mb-4 w-full">
+                <button id="resetPassword" class="bg-yellow-500 text-black px-4 py-2 rounded w-full font-bold">Send Password Reset</button>
             </div>
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-5 right-5 bg-cyan-500 text-black font-bold px-6 py-3 rounded-xl shadow-2xl hidden z-50"></div>
-
+    <div id="toast" class="fixed bottom-5 right-5 bg-cyan-500 text-black font-bold px-6 py-2 rounded hidden shadow-lg"></div>
     <script type="module" src="js/admin.js"></script>
 </body>
 </html>
