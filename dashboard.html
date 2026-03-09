@@ -1,253 +1,301 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberBuddy Student Portal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            background: #0b0f1a;
-            font-family: Inter, sans-serif;
-            color: #e2e8f0;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberBuddy Student Portal</title>
 
-        /* SIDEBAR TRANSITIONS */
-        #sidebar {
-            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 260px;
-            min-width: 260px;
-        }
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        #sidebar.collapsed {
-            width: 85px;
-            min-width: 85px;
-        }
+<style>
 
-        /* Prevent text wrapping/showing during collapse */
-        #sidebar span, #sidebar h1 {
-            white-space: nowrap;
-            transition: opacity 0.2s;
-        }
+body{
+background:#0b0f1a;
+font-family:Inter,sans-serif;
+color:#e2e8f0;
+overflow:hidden;
+}
 
-        #sidebar.collapsed span, 
-        #sidebar.collapsed h1 {
-            opacity: 0;
-            pointer-events: none;
-            width: 0;
-            display: none;
-        }
+#sidebar{
+transition:width .3s;
+width:260px;
+min-width:260px;
+}
 
-        #sidebar.collapsed .navBtn {
-            justify-content: center;
-            padding-left: 0;
-            padding-right: 0;
-        }
+#sidebar.collapsed{
+width:85px;
+min-width:85px;
+}
 
-        #sidebar.collapsed .logo-container {
-            justify-content: center;
-        }
+#sidebar span,#sidebar h1{
+white-space:nowrap;
+}
 
-        /* Glass Cards */
-        .glass {
-            background: rgba(30, 41, 59, 0.45);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+#sidebar.collapsed span,
+#sidebar.collapsed h1{
+display:none;
+}
 
-        .card-hover:hover {
-            transform: translateY(-4px);
-            transition: 0.25s;
-            border-color: #22d3ee;
-        }
+#sidebar.collapsed .navBtn{
+justify-content:center;
+}
 
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+.glass{
+background:rgba(30,41,59,.45);
+backdrop-filter:blur(10px);
+border:1px solid rgba(255,255,255,.05);
+}
 
-        .tab { display: none; }
-        .tab.active { display: block; }
-        
-        .navBtn.active-link {
-            background: rgba(34, 211, 238, 0.1);
-            border-left: 4px solid #22d3ee;
-            color: #22d3ee;
-        }
-    </style>
+.card-hover:hover{
+transform:translateY(-4px);
+border-color:#22d3ee;
+}
+
+.tab{display:none;}
+.tab.active{display:block;}
+
+.navBtn.active-link{
+background:rgba(34,211,238,.1);
+border-left:4px solid #22d3ee;
+color:#22d3ee;
+}
+
+</style>
 </head>
 
 <body class="flex h-screen">
 
-    <aside id="sidebar" class="bg-[#060a13] border-r border-slate-800 flex flex-col p-4">
-        <div class="flex items-center justify-between mb-8 px-2 logo-container">
-            <div class="flex items-center gap-3">
-                <div class="h-10 w-10 bg-cyan-500 rounded-xl flex items-center justify-center shrink-0">
-                    <i class="fas fa-bolt text-black"></i>
-                </div>
-                <h1 class="text-xl font-bold">
-                    Cyber<span class="text-cyan-400">Buddy</span>
-                </h1>
-            </div>
-            <button id="toggleSidebar" class="text-slate-400 hover:text-white transition">
-                <i class="fas fa-bars"></i>
-            </button>
-        </div>
+<!-- SIDEBAR -->
 
-        <nav class="flex-1 space-y-2">
-            <button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800 transition active-link" data-tab="dashboard">
-                <i class="fas fa-home w-5"></i>
-                <span>Dashboard</span>
-            </button>
-            <button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800 transition" data-tab="courses">
-                <i class="fas fa-play-circle w-5"></i>
-                <span>My Courses</span>
-            </button>
-            <button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800 transition" data-tab="certificates">
-                <i class="fas fa-award w-5"></i>
-                <span>Certificates</span>
-            </button>
-            <button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800 transition" data-tab="billing">
-                <i class="fas fa-file-invoice w-5"></i>
-                <span>Billing</span>
-            </button>
-            <button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800 transition" data-tab="profile">
-                <i class="fas fa-user w-5"></i>
-                <span>Profile</span>
-            </button>
-            <button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800 transition" data-tab="security">
-                <i class="fas fa-shield-alt w-5"></i>
-                <span>Security</span>
-            </button>
-        </nav>
+<aside id="sidebar" class="bg-[#060a13] border-r border-slate-800 flex flex-col p-4">
 
-        <button id="logoutBtn" class="bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white py-3 rounded-lg mt-6 transition font-bold">
-            <i class="fas fa-sign-out-alt px-2"></i>
-            <span>Logout</span>
-        </button>
-    </aside>
+<div class="flex items-center justify-between mb-8">
 
-    <main class="flex-1 flex flex-col">
-        <header class="h-20 border-b border-slate-800 flex items-center justify-between px-10">
-            <div>
-                <h2 id="viewTitle" class="text-xl font-bold">Dashboard</h2>
-                <p id="viewSubtitle" class="text-xs text-slate-500">Welcome back to CyberBuddy</p>
-            </div>
-            <div class="relative">
-                <i class="fas fa-search absolute left-3 top-3 text-slate-500 text-sm"></i>
-                <input id="searchCourse" placeholder="Search courses..." class="bg-slate-900 border border-slate-700 pl-10 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:border-cyan-400">
-            </div>
-        </header>
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 bg-cyan-500 rounded-xl flex items-center justify-center">
+<i class="fas fa-bolt text-black"></i>
+</div>
 
-        <div class="flex-1 overflow-y-auto p-10 space-y-10">
-            <section id="dashboard" class="tab active">
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="glass card-hover p-6 rounded-xl">
-                        <p class="text-slate-400 text-sm">Enrolled Courses</p>
-                        <h3 id="statCourses" class="text-3xl font-bold">0</h3>
-                    </div>
-                    <div class="glass card-hover p-6 rounded-xl">
-                        <p class="text-slate-400 text-sm">Certificates</p>
-                        <h3 id="statCertificates" class="text-3xl font-bold">0</h3>
-                    </div>
-                    <div class="glass card-hover p-6 rounded-xl">
-                        <p class="text-slate-400 text-sm">Rank</p>
-                        <h3 class="text-3xl font-bold">Level 1</h3>
-                    </div>
-                </div>
-                <h3 class="text-xl font-bold mt-10">Available Courses</h3>
-                <div id="coursesGrid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mt-6"></div>
-            </section>
+<h1 class="text-xl font-bold">
+Cyber<span class="text-cyan-400">Buddy</span>
+</h1>
+</div>
 
-            <section id="courses" class="tab">
-                <h3 class="text-xl font-bold mb-6">Your Learning</h3>
-                <div id="myCoursesGrid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-8"></div>
-            </section>
+<button id="toggleSidebar">
+<i class="fas fa-bars"></i>
+</button>
 
-            <section id="certificates" class="tab">
-                <h3 class="text-xl font-bold mb-6">Certificates</h3>
-                <div id="certList" class="space-y-4"></div>
-            </section>
+</div>
 
-            <section id="billing" class="tab">
-                <h3 class="text-xl font-bold mb-6">Billing History</h3>
-                <div id="invoiceList" class="space-y-4"></div>
-            </section>
 
-            <section id="profile" class="tab">
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div class="glass p-6 rounded-xl text-center">
-                        <img id="profilePhoto" class="w-24 h-24 rounded-full mx-auto border-4 border-cyan-400 object-cover mb-4" src="https://ui-avatars.com/api/?name=User">
-                        <h2 id="profileName" class="text-lg font-bold">Student</h2>
-                        <p id="profileEmailDisplay" class="text-sm text-cyan-400 mt-1 font-medium"></p>
-                    </div>
+<nav class="flex-1 space-y-2">
 
-                    <div class="glass p-6 rounded-xl md:col-span-2 space-y-4">
-                        <h3 class="text-xl font-bold">Profile Settings</h3>
-                        <label class="text-xs text-slate-500 uppercase font-bold">Full Name</label>
-                        <input id="editName" class="w-full bg-slate-900 border border-slate-700 p-3 rounded opacity-60 cursor-not-allowed" readonly>
-                        
-                        <label class="text-xs text-slate-500 uppercase font-bold">Phone Number</label>
-                        <input id="editPhone" class="w-full bg-slate-900 border border-slate-700 p-3 rounded" placeholder="Phone Number">
-                        
-                        <label class="text-xs text-slate-500 uppercase font-bold">Profile Photo URL</label>
-                        <input id="editPhoto" class="w-full bg-slate-900 border border-slate-700 p-3 rounded" placeholder="https://image-url.com">
-                        
-                        <button id="saveProfile" class="bg-cyan-500 hover:bg-cyan-400 text-black font-bold px-6 py-3 rounded transition w-full md:w-auto">
-                            Update Profile
-                        </button>
-                    </div>
-                </div>
-            </section>
+<button class="navBtn active-link w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800"
+data-tab="dashboard">
+<i class="fas fa-home w-5"></i>
+<span>Dashboard</span>
+</button>
 
-            <section id="security" class="tab">
-                <div class="glass p-8 rounded-xl space-y-6 max-w-xl">
-                    <h3 class="text-xl font-bold">Account Security</h3>
-                    <p class="text-sm text-slate-400">If you want to change your password, click the button below to receive a secure reset link.</p>
-                    <button id="resetBtn" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded transition font-bold">
-                        Send Password Reset Email
-                    </button>
-                </div>
-            </section>
-        </div>
-    </main>
+<button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800"
+data-tab="courses">
+<i class="fas fa-play-circle w-5"></i>
+<span>My Courses</span>
+</button>
 
-    <script type="module" src="js/dashboard.js"></script>
+<button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800"
+data-tab="certificates">
+<i class="fas fa-award w-5"></i>
+<span>Certificates</span>
+</button>
 
-    <script>
-        // SIDEBAR TOGGLE LOGIC
-        const sidebar = document.getElementById("sidebar");
-        const toggleBtn = document.getElementById("toggleSidebar");
+<button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800"
+data-tab="billing">
+<i class="fas fa-file-invoice w-5"></i>
+<span>Billing</span>
+</button>
 
-        toggleBtn.onclick = () => {
-            sidebar.classList.toggle("collapsed");
-        };
+<button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800"
+data-tab="profile">
+<i class="fas fa-user w-5"></i>
+<span>Profile</span>
+</button>
 
-        // TAB SWITCHING & UI LOGIC
-        document.querySelectorAll(".navBtn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                // Update active button state
-                document.querySelectorAll(".navBtn").forEach(b => b.classList.remove("active-link"));
-                btn.classList.add("active-link");
+<button class="navBtn w-full flex items-center gap-4 p-3 rounded hover:bg-slate-800"
+data-tab="security">
+<i class="fas fa-shield-alt w-5"></i>
+<span>Security</span>
+</button>
 
-                // Switch Tabs
-                const targetTab = btn.getAttribute("data-tab");
-                document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
-                document.getElementById(targetTab).classList.add("active");
+</nav>
 
-                // Update Header
-                document.getElementById("viewTitle").innerText = btn.querySelector('span').innerText;
-                document.getElementById("viewSubtitle").innerText = `Manage your CyberBuddy ${targetTab} details`;
-            });
-        });
+<button id="logoutBtn"
+class="bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white py-3 rounded-lg mt-6 transition font-bold">
 
-        // This listener ensures the email display is synced when Firebase data loads
-        // Assuming your dashboard.js updates a global or listens to auth
-        const observer = new MutationObserver(() => {
-            const emailValue = document.getElementById("profileEmail")?.innerText || "";
-            const display = document.getElementById("profileEmailDisplay");
-            if(display) display.innerText = emailValue;
-        });
-    </script>
+<i class="fas fa-sign-out-alt px-2"></i>
+<span>Logout</span>
+
+</button>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="flex-1 flex flex-col">
+
+<header class="h-20 border-b border-slate-800 flex items-center justify-between px-10">
+
+<div>
+<h2 id="viewTitle" class="text-xl font-bold">Dashboard</h2>
+<p id="viewSubtitle" class="text-xs text-slate-500">Welcome back</p>
+</div>
+
+<input id="searchCourse"
+placeholder="Search courses..."
+class="bg-slate-900 border border-slate-700 px-4 py-2 rounded-lg text-sm">
+
+</header>
+
+
+<div class="flex-1 overflow-y-auto p-10 space-y-10">
+
+<!-- DASHBOARD -->
+
+<section id="dashboard" class="tab active">
+
+<div class="grid md:grid-cols-3 gap-6">
+
+<div class="glass p-6 rounded-xl">
+<p class="text-slate-400 text-sm">Enrolled Courses</p>
+<h3 id="statCourses" class="text-3xl font-bold">0</h3>
+</div>
+
+<div class="glass p-6 rounded-xl">
+<p class="text-slate-400 text-sm">Certificates</p>
+<h3 id="statCertificates" class="text-3xl font-bold">0</h3>
+</div>
+
+<div class="glass p-6 rounded-xl">
+<p class="text-slate-400 text-sm">Rank</p>
+<h3 class="text-3xl font-bold">Level 1</h3>
+</div>
+
+</div>
+
+<h3 class="text-xl font-bold mt-10">Available Courses</h3>
+
+<div id="coursesGrid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mt-6"></div>
+
+</section>
+
+
+<!-- MY COURSES -->
+
+<section id="courses" class="tab">
+
+<h3 class="text-xl font-bold mb-6">Your Learning</h3>
+
+<div id="myCoursesGrid" class="grid lg:grid-cols-3 md:grid-cols-2 gap-8"></div>
+
+</section>
+
+
+<!-- PROFILE -->
+
+<section id="profile" class="tab">
+
+<div class="grid md:grid-cols-3 gap-6">
+
+<div class="glass p-6 rounded-xl text-center">
+
+<img id="profilePhoto"
+class="w-24 h-24 rounded-full mx-auto border-4 border-cyan-400 object-cover mb-4"
+src="https://ui-avatars.com/api/?name=User">
+
+<h2 id="profileName" class="text-lg font-bold">Student</h2>
+<p id="profileEmailDisplay" class="text-sm text-cyan-400"></p>
+
+<input type="file" id="photoUpload"
+class="hidden">
+
+<button onclick="document.getElementById('photoUpload').click()"
+class="bg-cyan-500 text-black px-4 py-2 rounded mt-4">
+Upload Photo
+</button>
+
+</div>
+
+
+<div class="glass p-6 rounded-xl md:col-span-2 space-y-4">
+
+<h3 class="text-xl font-bold">Profile Settings</h3>
+
+<label class="text-xs text-slate-500">Full Name</label>
+<input id="editName"
+class="w-full bg-slate-900 border border-slate-700 p-3 rounded opacity-60"
+readonly>
+
+<label class="text-xs text-slate-500">Mobile Number</label>
+<input id="editPhone"
+class="w-full bg-slate-900 border border-slate-700 p-3 rounded">
+
+<button id="saveProfile"
+class="bg-cyan-500 px-6 py-3 rounded font-bold">
+
+Update Profile
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+</div>
+
+</main>
+
+
+<script type="module" src="js/dashboard.js"></script>
+
+<script>
+
+const sidebar=document.getElementById("sidebar");
+document.getElementById("toggleSidebar").onclick=()=>{
+sidebar.classList.toggle("collapsed");
+};
+
+
+const search=document.getElementById("searchCourse");
+
+document.querySelectorAll(".navBtn").forEach(btn=>{
+
+btn.onclick=()=>{
+
+document.querySelectorAll(".navBtn").forEach(b=>b.classList.remove("active-link"));
+btn.classList.add("active-link");
+
+const tab=btn.dataset.tab;
+
+document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+document.getElementById(tab).classList.add("active");
+
+document.getElementById("viewTitle").innerText=btn.innerText;
+
+if(tab==="dashboard" || tab==="courses"){
+search.style.display="block";
+}else{
+search.style.display="none";
+}
+
+};
+
+});
+
+</script>
+
 </body>
 </html>
+
