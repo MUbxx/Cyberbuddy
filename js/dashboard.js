@@ -229,7 +229,7 @@ async function loadCertificates(user) {
                         <h4 class="font-bold text-blue-400">${cert.course}</h4>
                         <p class="text-xs text-slate-400">${cert.type} • ${cert.duration}</p>
                     </div>
-                    <a href="certificate.html?id=${cert.certId}" class="bg-blue-600 px-4 py-2 rounded-lg text-xs">View</a>
+                    <a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${cert.certId}" class="bg-blue-600 px-4 py-2 rounded-lg text-xs">View</a>
                 </div>`;
             });
         }
@@ -364,5 +364,6 @@ document.getElementById(btn.dataset.tab)
 };
 
 });
+
 
 
