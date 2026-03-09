@@ -239,10 +239,10 @@ document.getElementById("uploadBtn").onclick=async()=>{
 
 const title=document.getElementById("title").value;
 const description=document.getElementById("description").value;
-const thumbnail=document.getElementById("thumbnail").value;
+const image=document.getElementById("image").value;
 const video=document.getElementById("video").value;
 
-if(!title || !description || !thumbnail || !video){
+if(!title || !description || !image || !video){
 toast("Fill all fields");
 return;
 }
@@ -250,7 +250,7 @@ return;
 await setDoc(doc(db,"courses",title),{
 title,
 description,
-thumbnail,
+image,
 video
 });
 
@@ -314,3 +314,4 @@ document.getElementById(btn.dataset.tab).classList.add("active");
 };
 
 });
+
