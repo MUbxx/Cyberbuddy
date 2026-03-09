@@ -41,9 +41,17 @@ display:none;
 /* glass cards */
 
 .glass{
-background:rgba(30,41,59,.4);
+background:rgba(30,41,59,.45);
 backdrop-filter:blur(10px);
 border:1px solid rgba(255,255,255,.05);
+}
+
+/* hover cards */
+
+.card-hover:hover{
+transform:translateY(-4px);
+transition:.25s;
+border-color:#22d3ee;
 }
 
 /* scrollbar */
@@ -165,7 +173,7 @@ Dashboard
 
 <p id="viewSubtitle"
 class="text-xs text-slate-500">
-Welcome back
+Welcome back to CyberBuddy
 </p>
 
 </div>
@@ -185,19 +193,19 @@ class="bg-slate-900 border border-slate-700 px-4 py-2 rounded-lg text-sm">
 
 <section id="dashboard" class="tab active">
 
-<div class="grid grid-cols-3 gap-6">
+<div class="grid md:grid-cols-3 gap-6">
 
-<div class="glass p-6 rounded-xl">
+<div class="glass card-hover p-6 rounded-xl">
 <p class="text-slate-400 text-sm">Enrolled Courses</p>
 <h3 id="statCourses" class="text-3xl font-bold">0</h3>
 </div>
 
-<div class="glass p-6 rounded-xl">
+<div class="glass card-hover p-6 rounded-xl">
 <p class="text-slate-400 text-sm">Certificates</p>
 <h3 id="statCertificates" class="text-3xl font-bold">0</h3>
 </div>
 
-<div class="glass p-6 rounded-xl">
+<div class="glass card-hover p-6 rounded-xl">
 <p class="text-slate-400 text-sm">Rank</p>
 <h3 class="text-3xl font-bold">Level 1</h3>
 </div>
@@ -210,7 +218,7 @@ Available Courses
 </h3>
 
 <div id="coursesGrid"
-class="grid grid-cols-3 gap-8 mt-6">
+class="grid md:grid-cols-3 gap-8 mt-6">
 </div>
 
 </section>
@@ -226,7 +234,7 @@ Your Learning
 </h3>
 
 <div id="myCoursesGrid"
-class="grid grid-cols-3 gap-8">
+class="grid md:grid-cols-3 gap-8">
 </div>
 
 </section>
@@ -265,26 +273,51 @@ Billing History
 
 <section id="profile" class="tab">
 
-<div class="glass p-8 rounded-xl max-w-xl space-y-4">
+<div class="grid md:grid-cols-3 gap-6">
+
+<!-- PROFILE CARD -->
+
+<div class="glass p-6 rounded-xl text-center">
+
+<img id="profilePhoto"
+class="w-24 h-24 rounded-full mx-auto border-4 border-cyan-400 object-cover mb-4"
+src="https://ui-avatars.com/api/?name=User">
+
+<h2 id="profileName" class="text-lg font-bold">Student</h2>
+
+<p id="profileEmail" class="text-sm text-slate-400"></p>
+
+</div>
+
+
+<!-- PROFILE FORM -->
+
+<div class="glass p-6 rounded-xl md:col-span-2 space-y-4">
 
 <h3 class="text-xl font-bold">
-Profile
+Profile Settings
 </h3>
 
 <input id="editName"
 class="w-full bg-slate-900 border border-slate-700 p-3 rounded"
-placeholder="Name">
+placeholder="Full Name">
 
 <input id="editPhone"
 class="w-full bg-slate-900 border border-slate-700 p-3 rounded"
-placeholder="Phone">
+placeholder="Phone Number">
+
+<input id="editPhoto"
+class="w-full bg-slate-900 border border-slate-700 p-3 rounded"
+placeholder="Profile Photo URL">
 
 <button id="saveProfile"
-class="bg-cyan-500 px-6 py-3 rounded">
+class="bg-cyan-500 hover:bg-cyan-400 px-6 py-3 rounded">
 
 Update Profile
 
 </button>
+
+</div>
 
 </div>
 
@@ -296,12 +329,20 @@ Update Profile
 
 <section id="security" class="tab">
 
-<button id="resetBtn"
-class="bg-blue-600 px-6 py-3 rounded">
+<div class="glass p-8 rounded-xl space-y-6 max-w-xl">
 
-Send Password Reset Link
+<h3 class="text-xl font-bold">
+Account Security
+</h3>
+
+<button id="resetBtn"
+class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded">
+
+Send Password Reset Email
 
 </button>
+
+</div>
 
 </section>
 
