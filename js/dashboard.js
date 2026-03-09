@@ -155,7 +155,7 @@ return `
 <p class="text-sm text-slate-400 mb-4">${data.description || ""}</p>
 
 ${access
-? `<a href="course.html?id=${id}" class="bg-cyan-400 text-black px-4 py-2 rounded-lg text-sm font-bold block text-center">Start Learning</a>`
+? `<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${id}" class="bg-cyan-400 text-black px-4 py-2 rounded-lg text-sm font-bold block text-center">Start Learning</a>`
 : `<button class="w-full bg-slate-700 px-4 py-2 rounded-lg text-sm text-slate-400">Locked</button>`
 }
 
@@ -281,7 +281,7 @@ certList.innerHTML += `
 <p class="text-xs text-slate-400">${c.type} • ${c.duration}</p>
 </div>
 
-<a href="verify-certificate.html?id=${c.certId}"
+<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${c.certId}"
 class="bg-blue-600 px-4 py-2 rounded-lg text-xs">View</a>
 
 </div>
@@ -370,3 +370,4 @@ await signOut(auth);
 window.location="login.html";
 
 };
+
