@@ -74,13 +74,8 @@ Logout
 </aside>
 
 
-
-<!-- MAIN -->
-
 <main class="flex-1 p-10 space-y-10 overflow-y-auto">
 
-
-<!-- DASHBOARD -->
 
 <section id="dashboard" class="tab active">
 
@@ -109,8 +104,6 @@ Logout
 
 
 
-<!-- USERS -->
-
 <section id="users" class="tab">
 
 <h2 class="text-xl font-bold mb-4">Users</h2>
@@ -122,13 +115,18 @@ class="bg-gray-800 p-2 rounded mb-4 w-72">
 <table class="w-full text-sm">
 
 <thead class="border-b border-gray-700">
+
 <tr>
+
 <th class="p-3">Name</th>
 <th class="p-3">Email</th>
 <th class="p-3">Courses</th>
 <th class="p-3">Grant</th>
+<th class="p-3">Edit Name</th>
 <th class="p-3">Actions</th>
+
 </tr>
+
 </thead>
 
 <tbody id="usersList"></tbody>
@@ -138,8 +136,6 @@ class="bg-gray-800 p-2 rounded mb-4 w-72">
 </section>
 
 
-
-<!-- COURSES -->
 
 <section id="courses" class="tab">
 
@@ -151,7 +147,7 @@ class="bg-gray-800 p-2 rounded mb-4 w-72">
 
 <input id="description" placeholder="Course Description" class="bg-gray-800 p-2 rounded w-full">
 
-<input id="image" placeholder="image URL" class="bg-gray-800 p-2 rounded w-full">
+<input id="image" placeholder="Thumbnail Image URL" class="bg-gray-800 p-2 rounded w-full">
 
 <input id="video" placeholder="Video URL" class="bg-gray-800 p-2 rounded w-full">
 
@@ -167,8 +163,6 @@ Upload Course
 </section>
 
 
-
-<!-- SECURITY -->
 
 <section id="security" class="tab">
 
@@ -194,6 +188,3 @@ class="fixed bottom-5 right-5 bg-cyan-500 text-black px-4 py-2 rounded hidden"><
 
 </body>
 </html>
-```
-
-
