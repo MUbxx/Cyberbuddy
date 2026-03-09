@@ -5,15 +5,17 @@ collection,
 getDocs,
 doc,
 getDoc,
-updateDoc,
-setDoc
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+onSnapshot,
+updateDoc
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 import {
 onAuthStateChanged,
 signOut,
 sendPasswordResetEmail
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+}
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 
 /* ===============================
@@ -31,12 +33,11 @@ const resetBtn = document.getElementById("resetBtn");
 
 const editName = document.getElementById("editName");
 const editPhone = document.getElementById("editPhone");
+const editPhoto = document.getElementById("editPhoto");
 
-const profilePhoto = document.getElementById("profilePhoto");
-const photoUpload = document.getElementById("photoUpload");
-
-const profileName = document.getElementById("profileName");
+const profileNameDisplay = document.getElementById("profileNameDisplay");
 const profileEmailDisplay = document.getElementById("profileEmailDisplay");
+const profilePhoto = document.getElementById("profilePhoto");
 
 const statCourses = document.getElementById("statCourses");
 const statCertificates = document.getElementById("statCertificates");
@@ -58,44 +59,44 @@ window.location = "login.html";
 return;
 }
 
-const savedPhoto = localStorage.getItem("profilePhoto");
-
-if(savedPhoto){
-profilePhoto.src = savedPhoto;
+if(profileEmailDisplay){
+profileEmailDisplay.innerText = user.email;
 }
 
-await loadUser(user);
-await loadCourses();
-await loadCertificates(user);
-await loadInvoices(user);
+/* load external data */
 
-});
+loadCertificates(user);
+loadInvoices(user);
 
+const userRef = doc(db, "users", user.uid);
 
-/* ===============================
-LOAD USER
-================================ */
+/* realtime profile updates */
 
-async function loadUser(user){
-
-const snap = await getDoc(doc(db,"users",user.uid));
-
-if(!snap.exists()) return;
+onSnapshot(userRef, (snap) => {
 
 userData = snap.data();
 
-profileName.innerText = userData.name || "Student";
-profileEmailDisplay.innerText = user.email;
+if(userData){
 
 editName.value = userData.name || "";
 editPhone.value = userData.phone || "";
+editPhoto.value = userData.photoURL || "";
 
-if(userData.photo){
-profilePhoto.src = userData.photo;
-localStorage.setItem("profilePhoto",userData.photo);
+if(profileNameDisplay){
+profileNameDisplay.innerText = userData.name || "Student";
 }
 
+if(profilePhoto && userData.photoURL){
+profilePhoto.src = userData.photoURL;
 }
+
+loadCourses();
+
+}
+
+});
+
+});
 
 
 /* ===============================
@@ -104,23 +105,23 @@ LOAD COURSES
 
 async function loadCourses(){
 
-coursesGrid.innerHTML="";
-myCoursesGrid.innerHTML="";
+coursesGrid.innerHTML = "";
+myCoursesGrid.innerHTML = "";
 
-const snap = await getDocs(collection(db,"courses"));
+const coursesSnap = await getDocs(collection(db,"courses"));
 
-allCourses=[];
+allCourses = [];
 
-snap.forEach(docSnap=>{
+coursesSnap.forEach(course=>{
 
-const data = docSnap.data();
-const id = docSnap.id;
+const data = course.data();
+const courseId = course.id;
 
-allCourses.push({id,...data});
+allCourses.push({id:courseId,...data});
 
-const access = userData?.purchasedCourses?.includes(id);
+const access = userData?.purchasedCourses?.includes(courseId);
 
-const card = createCourseCard(id,data,access);
+const card = createCourseCard(courseId,data,access);
 
 coursesGrid.innerHTML += card;
 
@@ -139,24 +140,31 @@ statCourses.innerText = userData?.purchasedCourses?.length || 0;
 COURSE CARD
 ================================ */
 
-function createCourseCard(id,data,access){
-
-const img = data.image || data.thumbnail || "https://via.placeholder.com/400x200";
+function createCourseCard(courseId,data,access){
 
 return `
 <div class="glass rounded-xl overflow-hidden border border-slate-800 hover:border-cyan-400 transition">
 
-<img src="${img}" class="w-full h-40 object-cover">
+<img src="${data.image || data.thumbnail || 'https://via.placeholder.com/400x200'}"
+class="w-full h-40 object-cover">
 
 <div class="p-5">
 
-<h3 class="font-bold text-lg mb-2">${data.title || id}</h3>
+<h3 class="font-bold text-lg mb-2">${data.title || courseId}</h3>
 
-<p class="text-sm text-slate-400 mb-4">${data.description || ""}</p>
+<p class="text-sm text-slate-400 mb-4">
+${data.description || ""}
+</p>
 
-${access
-? `<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${id}" class="bg-cyan-400 text-black px-4 py-2 rounded-lg text-sm font-bold block text-center">Start Learning</a>`
-: `<button class="w-full bg-slate-700 px-4 py-2 rounded-lg text-sm text-slate-400">Locked</button>`
+${
+access
+? `<a href="course.html?id=${courseId}"
+class="bg-cyan-400 text-black px-4 py-2 rounded-lg text-sm font-bold block text-center">
+Start Learning
+</a>`
+: `<button class="w-full bg-slate-700 px-4 py-2 rounded-lg text-sm text-slate-400">
+Locked
+</button>`
 }
 
 </div>
@@ -167,24 +175,24 @@ ${access
 
 
 /* ===============================
-SEARCH COURSES
+COURSE SEARCH
 ================================ */
 
 if(searchInput){
 
 searchInput.addEventListener("input",()=>{
 
-const q = searchInput.value.toLowerCase();
+const query = searchInput.value.toLowerCase();
 
-coursesGrid.innerHTML="";
+coursesGrid.innerHTML = "";
 
-allCourses.forEach(c=>{
+allCourses.forEach(course=>{
 
-if((c.title || "").toLowerCase().includes(q)){
+if((course.title || "").toLowerCase().includes(query)){
 
-const access = userData?.purchasedCourses?.includes(c.id);
+const access = userData?.purchasedCourses?.includes(course.id);
 
-coursesGrid.innerHTML += createCourseCard(c.id,c,access);
+coursesGrid.innerHTML += createCourseCard(course.id,course,access);
 
 }
 
@@ -193,63 +201,6 @@ coursesGrid.innerHTML += createCourseCard(c.id,c,access);
 });
 
 }
-
-
-/* ===============================
-PROFILE PHOTO UPLOAD
-================================ */
-
-if(photoUpload){
-
-photoUpload.addEventListener("change",async function(){
-
-const file = this.files[0];
-if(!file) return;
-
-const reader = new FileReader();
-
-reader.onload = async ()=>{
-
-const base64 = reader.result;
-
-profilePhoto.src = base64;
-localStorage.setItem("profilePhoto",base64);
-
-const user = auth.currentUser;
-
-await setDoc(
-doc(db,"users",user.uid),
-{ photo: base64 },
-{ merge:true }
-);
-
-};
-
-reader.readAsDataURL(file);
-
-});
-
-}
-
-
-/* ===============================
-UPDATE PHONE
-================================ */
-
-document.getElementById("saveProfile").onclick = async ()=>{
-
-const phone = editPhone.value;
-const user = auth.currentUser;
-
-await setDoc(
-doc(db,"users",user.uid),
-{ phone },
-{ merge:true }
-);
-
-alert("Profile updated");
-
-};
 
 
 /* ===============================
@@ -258,41 +209,75 @@ CERTIFICATES
 
 async function loadCertificates(user){
 
-if(!certList) return;
+if(!user || !user.email) return;
+
+certList.innerHTML = "Loading certificates...";
 
 try{
 
-const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json");
-const data = await res.json();
-
-const list = data.certificates.filter(c =>
-c.email?.toLowerCase() === user.email.toLowerCase()
+const res = await fetch(
+"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/certificates.json"
 );
 
-certList.innerHTML="";
+const data = await res.json();
 
-list.forEach(c=>{
+const userCerts = (data.certificates || []).filter(cert =>
+
+(cert.email || "")
+.toLowerCase()
+.trim() === user.email.toLowerCase().trim()
+
+);
+
+certList.innerHTML = "";
+
+if(userCerts.length === 0){
+
+certList.innerHTML = "No certificates found";
+
+}else{
+
+userCerts.forEach(cert=>{
 
 certList.innerHTML += `
-<div class="glass p-5 rounded-xl flex justify-between items-center">
+
+<div class="glass p-5 rounded-xl flex justify-between items-center mb-3">
 
 <div>
-<h4 class="font-bold text-blue-400">${c.course}</h4>
-<p class="text-xs text-slate-400">${c.type} • ${c.duration}</p>
+
+<h4 class="font-bold text-blue-400">
+${cert.course}
+</h4>
+
+<p class="text-xs text-slate-400">
+${cert.type} • ${cert.duration}
+</p>
+
 </div>
 
-<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${c.certId}"
-class="bg-blue-600 px-4 py-2 rounded-lg text-xs">View</a>
+<a href="https://mubyyy404.github.io/Cyber-Buddy/verify-certificate.html?id=${cert.certId}"
+class="bg-blue-600 px-4 py-2 rounded-lg text-xs hover:bg-blue-500 transition">
+
+View
+
+</a>
 
 </div>
+
 `;
 
 });
 
-statCertificates.innerText = list.length;
+}
 
-}catch(e){
-console.error(e);
+statCertificates.innerText = userCerts.length;
+
+}catch(err){
+
+console.error("Certificate error:",err);
+
+certList.innerHTML = "Error loading certificates";
+
 }
 
 }
@@ -304,42 +289,106 @@ BILLING
 
 async function loadInvoices(user){
 
-if(!invoiceList) return;
+if(!user || !user.email) return;
+
+invoiceList.innerHTML = "Loading billing...";
 
 try{
 
-const res = await fetch("https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json");
-const bills = await res.json();
-
-const list = bills.filter(b =>
-b.email?.toLowerCase() === user.email.toLowerCase()
+const res = await fetch(
+"https://raw.githubusercontent.com/Mubyyy404/Cyber-Buddy/main/bills.json"
 );
 
-invoiceList.innerHTML="";
+const bills = await res.json();
 
-list.forEach(b=>{
+const userBills = (bills || []).filter(bill =>
+
+(bill.email || "")
+.toLowerCase()
+.trim() === user.email.toLowerCase().trim()
+
+);
+
+invoiceList.innerHTML = "";
+
+if(userBills.length === 0){
+
+invoiceList.innerHTML = "No billing history found";
+
+}else{
+
+userBills.forEach(bill=>{
 
 invoiceList.innerHTML += `
-<div class="glass p-5 rounded-xl flex justify-between items-center">
+
+<div class="glass p-5 rounded-xl flex justify-between items-center mb-3">
 
 <div>
-<h4 class="font-bold text-green-400">${b.course}</h4>
-<p class="text-xs text-slate-400">₹${b.amount} • ${b.date}</p>
+
+<h4 class="font-bold text-green-400">
+${bill.course}
+</h4>
+
+<p class="text-xs text-slate-400">
+₹${bill.amount} • ${bill.date}
+</p>
+
 </div>
 
-<a href="${b.verifyUrl}" target="_blank"
-class="bg-slate-800 px-4 py-2 rounded-lg text-xs">Verify</a>
+<a href="${bill.verifyUrl}" target="_blank"
+class="bg-slate-800 px-4 py-2 rounded-lg text-xs hover:bg-slate-700 transition">
+
+Verify
+
+</a>
 
 </div>
+
 `;
 
 });
 
-}catch(e){
-console.error(e);
+}
+
+}catch(err){
+
+console.error("Billing error:",err);
+
+invoiceList.innerHTML = "Error loading billing data";
+
 }
 
 }
+
+
+/* ===============================
+PROFILE UPDATE
+================================ */
+
+document.getElementById("saveProfile").onclick = async ()=>{
+
+const user = auth.currentUser;
+const ref = doc(db,"users",user.uid);
+
+try{
+
+await updateDoc(ref,{
+name:editName.value,
+phone:editPhone.value,
+photoURL:editPhoto.value
+});
+
+alert("Profile updated");
+
+}catch(error){
+
+console.error("Update Error:",error);
+
+alert("Failed to update profile");
+
+}
+
+};
 
 
 /* ===============================
@@ -351,6 +400,7 @@ if(resetBtn){
 resetBtn.onclick = async ()=>{
 
 const user = auth.currentUser;
+
 await sendPasswordResetEmail(auth,user.email);
 
 alert("Password reset email sent");
@@ -367,7 +417,43 @@ LOGOUT
 logoutBtn.onclick = async ()=>{
 
 await signOut(auth);
-window.location="login.html";
+
+window.location = "login.html";
 
 };
 
+
+/* ===============================
+SIDEBAR TOGGLE
+================================ */
+
+document.getElementById("toggleSidebar").onclick = ()=>{
+
+document.getElementById("sidebar").classList.toggle("collapsed");
+
+};
+
+
+/* ===============================
+TAB SWITCHING
+================================ */
+
+document.querySelectorAll(".navBtn").forEach(btn=>{
+
+btn.onclick = ()=>{
+
+document.querySelectorAll(".tab")
+.forEach(tab=>tab.classList.remove("active"));
+
+document.getElementById(btn.dataset.tab)
+.classList.add("active");
+
+const viewTitle = document.getElementById("viewTitle");
+
+if(viewTitle){
+viewTitle.innerText = btn.querySelector("span").innerText;
+}
+
+};
+
+});
