@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,21 +22,27 @@ color:#e2e8f0;
 overflow:hidden;
 }
 
-/* sidebar */
+/* SIDEBAR */
 
 #sidebar{
-transition:width .3s ease;
+transition:all .3s ease;
 width:260px;
 min-width:260px;
 }
 
 #sidebar.collapsed{
-width:90px;
-min-width:90px;
+width:80px;
+min-width:80px;
 }
 
+/* hide text only */
 #sidebar.collapsed span{
 display:none;
+}
+
+/* center icons when collapsed */
+#sidebar.collapsed .navBtn{
+justify-content:center;
 }
 
 /* glass cards */
@@ -275,8 +282,6 @@ Billing History
 
 <div class="grid md:grid-cols-3 gap-6">
 
-<!-- PROFILE CARD -->
-
 <div class="glass p-6 rounded-xl text-center">
 
 <img id="profilePhoto"
@@ -289,8 +294,6 @@ src="https://ui-avatars.com/api/?name=User">
 
 </div>
 
-
-<!-- PROFILE FORM -->
 
 <div class="glass p-6 rounded-xl md:col-span-2 space-y-4">
 
@@ -355,6 +358,12 @@ Send Password Reset Email
 
 <script type="module" src="js/dashboard.js"></script>
 
+<script>
+document.getElementById("toggleSidebar").onclick = () => {
+document.getElementById("sidebar").classList.toggle("collapsed");
+};
+</script>
+
 </body>
 </html>
-
+```
