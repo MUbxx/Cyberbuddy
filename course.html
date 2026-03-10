@@ -5,64 +5,438 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Course Player</title>
+<title>Course Player | CyberBuddy</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<style>
+
+body{
+background:#0f172a;
+color:#e2e8f0;
+font-family:Inter,sans-serif;
+}
+
+.sidebar{
+background:#020617;
+}
+
+.lesson{
+cursor:pointer;
+padding:10px;
+border-radius:6px;
+font-size:13px;
+}
+
+.lesson:hover{
+background:#1e293b;
+}
+
+.lesson.active{
+background:#06b6d4;
+color:black;
+}
+
+.control-btn{
+background:#1e293b;
+padding:8px 14px;
+border-radius:6px;
+font-size:13px;
+}
+
+.control-btn:hover{
+background:#334155;
+}
+
+</style>
+
 </head>
 
-<body class="bg-slate-950 text-white flex h-screen">
+<body class="flex h-screen">
 
-<!-- LESSON SIDEBAR -->
+<!-- SIDEBAR -->
 
-<div class="w-80 bg-slate-900 border-r border-slate-800 overflow-y-auto">
+<aside class="sidebar w-80 border-r border-slate-800 overflow-y-auto">
 
-<div class="p-5 border-b border-slate-800">
+<div class="p-6 border-b border-slate-800">
 
-<h2 id="courseTitle" class="text-lg font-bold"></h2>
+<h2 id="courseTitle" class="text-xl font-bold"></h2>
 
-<div class="w-full bg-slate-800 rounded mt-3">
-<div id="progressBar" class="bg-cyan-400 h-2 rounded"></div>
+<p class="text-xs text-slate-400">
+CyberBuddy Academy
+</p>
+
+</div>
+
+<div id="modulesContainer" class="p-4 space-y-4"></div>
+
+</aside>
+
+
+
+<!-- MAIN PLAYER -->
+
+<main class="flex-1 flex flex-col">
+
+<header class="p-6 border-b border-slate-800">
+
+<h2 id="lessonTitle" class="text-xl font-bold">
+Select a lesson
+</h2>
+
+</header>
+
+
+<div class="p-8 space-y-6 flex-1 overflow-y-auto">
+
+<div class="bg-black rounded-xl overflow-hidden">
+
+<video id="videoPlayer" class="w-full" controls></video>
+
+</div>
+
+
+
+<!-- CONTROLS -->
+
+<div class="flex flex-wrap gap-3">
+
+<button class="control-btn" onclick="seek(-10)">⏪ 10s</button>
+<button class="control-btn" onclick="seek(10)">⏩ 10s</button>
+
+<button class="control-btn" onclick="setSpeed(1)">1x</button>
+<button class="control-btn" onclick="setSpeed(1.5)">1.5x</button>
+<button class="control-btn" onclick="setSpeed(2)">2x</button>
+<button class="control-btn" onclick="setSpeed(3)">3x</button>
+
+<button class="control-btn" onclick="prevLesson()">Prev</button>
+<button class="control-btn" onclick="nextLesson()">Next</button>
+
+</div>
+
+
+
+<!-- PROGRESS -->
+
+<div>
+
+<p class="text-sm mb-2">Course Progress</p>
+
+<div class="w-full bg-slate-800 h-2 rounded">
+
+<div id="progressBar" class="bg-cyan-400 h-2 rounded" style="width:0%"></div>
+
 </div>
 
 </div>
 
-<div id="moduleList"></div>
+
+
+<!-- DESCRIPTION -->
+
+<div>
+
+<h3 class="text-lg font-bold mb-2">Lesson Description</h3>
+
+<p id="lessonDescription" class="text-slate-400 text-sm"></p>
 
 </div>
 
 
-<!-- VIDEO PLAYER -->
 
-<div class="flex-1 flex flex-col">
-
-<div class="flex-1 bg-black">
-
-<iframe
-id="videoPlayer"
-class="w-full h-full"
-allowfullscreen
-></iframe>
-
-</div>
-
-<div class="p-6 bg-slate-900 border-t border-slate-800">
-
-<h3 id="lessonTitle" class="text-xl font-bold"></h3>
-
-<button
-id="markComplete"
-class="mt-4 bg-cyan-500 px-5 py-2 rounded text-black font-bold">
-
-Mark Lesson Complete
-
+<button id="completeBtn" class="bg-green-500 text-black px-4 py-2 rounded">
+Mark Lesson Completed
 </button>
 
 </div>
 
-</div>
+</main>
 
-<script type="module" src="js/course.js"></script>
+
+
+<script type="module">
+
+import { auth, db } from "./js/firebase.js"
+
+import { onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"
+
+import { doc, getDoc } 
+from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js"
+
+
+
+/* GET COURSE ID FROM URL */
+
+const params = new URLSearchParams(window.location.search)
+
+const courseId = params.get("id")
+
+
+
+if(!courseId){
+window.location="dashboard.html"
+}
+
+
+
+/* AUTH + PURCHASE CHECK */
+
+onAuthStateChanged(auth, async(user)=>{
+
+if(!user){
+
+window.location="login.html"
+return
+
+}
+
+const snap = await getDoc(doc(db,"users",user.uid))
+
+const userData = snap.data()
+
+if(!userData.purchasedCourses || !userData.purchasedCourses.includes(courseId)){
+
+window.location="dashboard.html"
+return
+
+}
+
+loadCourse()
+
+})
+
+
+
+/* SAMPLE COURSE DATA (can be moved to Firebase later) */
+
+const courses = {
+
+"web-pentesting":{
+
+title:"Web Application Pentesting",
+
+modules:[
+
+{
+title:"Introduction",
+
+lessons:[
+{
+title:"What is Pentesting",
+video:"videos/intro1.mp4",
+desc:"Introduction to web pentesting."
+},
+
+{
+title:"Pentesting Methodology",
+video:"videos/intro2.mp4",
+desc:"Learn the pentesting workflow."
+}
+
+]
+},
+
+{
+title:"Web Architecture",
+
+lessons:[
+{
+title:"HTTP Basics",
+video:"videos/http.mp4",
+desc:"Understanding HTTP."
+},
+
+{
+title:"How Websites Work",
+video:"videos/webworking.mp4",
+desc:"Client server communication."
+}
+
+]
+},
+
+{
+title:"Vulnerabilities",
+
+lessons:[
+{
+title:"SQL Injection",
+video:"videos/sqli.mp4",
+desc:"SQL Injection attack."
+},
+
+{
+title:"XSS Attack",
+video:"videos/xss.mp4",
+desc:"Cross-site scripting."
+}
+
+]
+}
+
+]
+
+}
+
+}
+
+
+
+let modules = []
+let currentModule=0
+let currentLesson=0
+
+
+
+const modulesContainer = document.getElementById("modulesContainer")
+const video = document.getElementById("videoPlayer")
+const lessonTitle = document.getElementById("lessonTitle")
+const lessonDesc = document.getElementById("lessonDescription")
+const progressBar = document.getElementById("progressBar")
+
+
+
+function loadCourse(){
+
+const course = courses[courseId]
+
+modules = course.modules
+
+document.getElementById("courseTitle").innerText = course.title
+
+modulesContainer.innerHTML=""
+
+modules.forEach((m,i)=>{
+
+const box=document.createElement("div")
+
+box.innerHTML=`
+<div class="font-bold text-sm mb-2">${m.title}</div>
+<div id="lessons-${i}" class="space-y-1"></div>
+`
+
+modulesContainer.appendChild(box)
+
+const lessonBox=document.getElementById(`lessons-${i}`)
+
+m.lessons.forEach((l,j)=>{
+
+const el=document.createElement("div")
+
+el.className="lesson"
+
+el.innerText=l.title
+
+el.onclick=()=>loadLesson(i,j,el)
+
+lessonBox.appendChild(el)
+
+})
+
+})
+
+}
+
+
+
+function loadLesson(m,l,el){
+
+document.querySelectorAll(".lesson").forEach(x=>x.classList.remove("active"))
+
+el.classList.add("active")
+
+currentModule=m
+currentLesson=l
+
+const lesson = modules[m].lessons[l]
+
+video.src = lesson.video
+
+lessonTitle.innerText = lesson.title
+
+lessonDesc.innerText = lesson.desc
+
+updateProgress()
+
+}
+
+
+
+/* VIDEO FUNCTIONS */
+
+window.seek=(s)=> video.currentTime += s
+
+window.setSpeed=(s)=> video.playbackRate = s
+
+
+
+window.nextLesson=()=>{
+
+if(currentLesson < modules[currentModule].lessons.length-1){
+
+currentLesson++
+
+}else{
+
+currentModule++
+currentLesson=0
+
+}
+
+loadLesson(currentModule,currentLesson,
+document.querySelectorAll(".lesson")[currentLesson])
+
+}
+
+
+
+window.prevLesson=()=>{
+
+if(currentLesson>0){
+
+currentLesson--
+
+}
+
+}
+
+
+
+/* COMPLETION */
+
+document.getElementById("completeBtn").onclick=()=>{
+
+localStorage.setItem(courseId+"-"+currentModule+"-"+currentLesson,true)
+
+updateProgress()
+
+}
+
+
+
+function updateProgress(){
+
+let total=0
+let done=0
+
+modules.forEach((m,i)=>{
+
+m.lessons.forEach((l,j)=>{
+
+total++
+
+if(localStorage.getItem(courseId+"-"+i+"-"+j)) done++
+
+})
+
+})
+
+progressBar.style.width = (done/total*100)+"%"
+
+}
+
+</script>
 
 </body>
 </html>
