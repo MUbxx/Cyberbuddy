@@ -1,0 +1,364 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CyberBuddy Course Builder</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background:#0f172a;
+color:#e2e8f0;
+font-family:Inter,sans-serif;
+}
+
+.card{
+background:#1e293b;
+padding:18px;
+border-radius:10px;
+}
+
+input,textarea{
+background:#020617;
+padding:8px;
+border-radius:6px;
+width:100%;
+}
+
+button{
+border-radius:6px;
+padding:6px 12px;
+}
+
+</style>
+
+</head>
+
+<body class="p-10 space-y-8">
+
+<h1 class="text-3xl font-bold">
+CyberBuddy Course Builder
+</h1>
+
+
+<!-- GitHub Settings -->
+
+<div class="card space-y-3">
+
+<h2 class="font-bold text-lg">
+GitHub Upload Settings
+</h2>
+
+<input id="token" placeholder="GitHub Token">
+
+<input id="repo" placeholder="username/repository">
+
+<input id="branch" placeholder="branch (example: main)">
+
+<button onclick="saveGithubSettings()" class="bg-green-500 text-black">
+Save Settings
+</button>
+
+</div>
+
+
+
+<!-- Course Info -->
+
+<div class="card space-y-3">
+
+<h2 class="font-bold text-lg">Course Info</h2>
+
+<input id="courseTitle" placeholder="Course Title">
+
+<button onclick="addModule()" class="bg-cyan-500 text-black">
+Add Module
+</button>
+
+</div>
+
+
+
+<div id="modules" class="space-y-6"></div>
+
+
+
+<button onclick="exportCourse()" class="bg-green-500 text-black px-4 py-2">
+
+Export Course JSON
+
+</button>
+
+
+
+<script>
+
+/* COURSE STRUCTURE */
+
+let course = {
+title:"",
+modules:[]
+}
+
+
+
+/* ===============================
+SAVE GITHUB SETTINGS
+================================ */
+
+function saveGithubSettings(){
+
+localStorage.setItem("gh_token",document.getElementById("token").value)
+localStorage.setItem("gh_repo",document.getElementById("repo").value)
+localStorage.setItem("gh_branch",document.getElementById("branch").value)
+
+alert("Settings saved")
+
+}
+
+
+
+/* ===============================
+LOAD SAVED SETTINGS
+================================ */
+
+window.onload=()=>{
+
+document.getElementById("token").value=localStorage.getItem("gh_token")||""
+document.getElementById("repo").value=localStorage.getItem("gh_repo")||""
+document.getElementById("branch").value=localStorage.getItem("gh_branch")||"main"
+
+}
+
+
+
+/* ===============================
+MODULE
+================================ */
+
+function addModule(){
+
+course.modules.push({
+title:"",
+lessons:[]
+})
+
+renderModules()
+
+}
+
+
+
+/* ===============================
+LESSON
+================================ */
+
+function addLesson(moduleIndex){
+
+course.modules[moduleIndex].lessons.push({
+title:"",
+video:"",
+description:"",
+document:""
+})
+
+renderModules()
+
+}
+
+
+
+/* ===============================
+RENDER UI
+================================ */
+
+function renderModules(){
+
+const container=document.getElementById("modules")
+
+container.innerHTML=""
+
+course.modules.forEach((module,m)=>{
+
+const moduleBox=document.createElement("div")
+
+moduleBox.className="card space-y-3"
+
+moduleBox.innerHTML=`
+
+<input placeholder="Module Title"
+oninput="course.modules[${m}].title=this.value">
+
+<button onclick="addLesson(${m})"
+class="bg-blue-500">
+Add Lesson
+</button>
+
+<div id="lessons-${m}" class="space-y-3"></div>
+
+`
+
+container.appendChild(moduleBox)
+
+const lessonBox=moduleBox.querySelector(`#lessons-${m}`)
+
+module.lessons.forEach((lesson,l)=>{
+
+const lessonDiv=document.createElement("div")
+
+lessonDiv.className="card space-y-2"
+
+lessonDiv.innerHTML=`
+
+<input placeholder="Lesson Title"
+oninput="course.modules[${m}].lessons[${l}].title=this.value">
+
+<label>Upload Video</label>
+<input type="file" onchange="uploadVideo(event,${m},${l})">
+
+<textarea placeholder="Lesson Description"
+oninput="course.modules[${m}].lessons[${l}].description=this.value"></textarea>
+
+<label>Optional Document</label>
+<input type="file" onchange="uploadDoc(event,${m},${l})">
+
+`
+
+lessonBox.appendChild(lessonDiv)
+
+})
+
+})
+
+}
+
+
+
+/* ===============================
+UPLOAD VIDEO TO GITHUB
+================================ */
+
+async function uploadVideo(e,m,l){
+
+const file=e.target.files[0]
+
+const token=localStorage.getItem("gh_token")
+const repo=localStorage.getItem("gh_repo")
+const branch=localStorage.getItem("gh_branch")||"main"
+
+const path="videos/"+file.name
+
+const buffer=await file.arrayBuffer()
+
+const base64=btoa(
+new Uint8Array(buffer)
+.reduce((data,byte)=>data+String.fromCharCode(byte),'')
+)
+
+await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
+
+method:"PUT",
+
+headers:{
+Authorization:"token "+token
+},
+
+body:JSON.stringify({
+message:"upload video",
+content:base64,
+branch:branch
+})
+
+})
+
+const url=`https://raw.githubusercontent.com/${repo}/${branch}/${path}`
+
+course.modules[m].lessons[l].video=url
+
+alert("Video uploaded successfully")
+
+}
+
+
+
+/* ===============================
+UPLOAD DOCUMENT
+================================ */
+
+async function uploadDoc(e,m,l){
+
+const file=e.target.files[0]
+
+const token=localStorage.getItem("gh_token")
+const repo=localStorage.getItem("gh_repo")
+const branch=localStorage.getItem("gh_branch")||"main"
+
+const path="docs/"+file.name
+
+const buffer=await file.arrayBuffer()
+
+const base64=btoa(
+new Uint8Array(buffer)
+.reduce((data,byte)=>data+String.fromCharCode(byte),'')
+)
+
+await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
+
+method:"PUT",
+
+headers:{
+Authorization:"token "+token
+},
+
+body:JSON.stringify({
+message:"upload doc",
+content:base64,
+branch:branch
+})
+
+})
+
+const url=`https://raw.githubusercontent.com/${repo}/${branch}/${path}`
+
+course.modules[m].lessons[l].document=url
+
+alert("Document uploaded")
+
+}
+
+
+
+/* ===============================
+EXPORT COURSE
+================================ */
+
+function exportCourse(){
+
+course.title=document.getElementById("courseTitle").value
+
+const json=JSON.stringify(course,null,2)
+
+const blob=new Blob([json])
+
+const a=document.createElement("a")
+
+a.href=URL.createObjectURL(blob)
+
+a.download="course.json"
+
+a.click()
+
+}
+
+</script>
+
+</body>
+</html>
+```
